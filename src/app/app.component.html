@@ -1,0 +1,47 @@
+﻿<a class="skip-link" href="#main">Zum Inhalt</a>
+<div class="game-shell">
+  <header class="topbar">
+    <a class="brand" href="./">BATTLEFIELD<span>MV / MOST VALUABLE</span></a>
+    <nav aria-label="Hauptmenü">
+      <button type="button" [class.active]="view() === 'clan'" [attr.aria-current]="view() === 'clan' ? 'page' : null" (click)="view.set('clan')">UNSER CLAN</button>
+      <button type="button" [class.active]="view() === 'squad'" [attr.aria-current]="view() === 'squad' ? 'page' : null" (click)="view.set('squad')">SQUAD</button>
+    </nav>
+    <div class="session-info"><span>02 SPIELER</span></div>
+  </header>
+  <main id="main" class="lobby">
+    <section class="details" aria-label="Squad-Informationen">
+      @if (view() === 'clan') {
+        <p class="eyebrow">BATTLEFIELD / CLAN MV</p><h1>MOST<br>VALUABLE<span>.</span></h1>
+        <p class="intro">Zwei Spieler. Ein Team.<br>Gemeinsam rein. Gemeinsam raus.</p>
+        <div class="clan-summary"><span>UNSER SPIEL</span><strong>Battlefield 6</strong><span>UNSER SQUAD</span><strong>MV-Criban &amp; MV-8lackh4wk</strong></div>
+      } @else {
+        <p class="eyebrow">BATTLEFIELD 6 / MULTIPLAYER</p><h1>UNSER SQUAD<span>.</span></h1>
+        <p class="intro">Wähle einen Soldaten.<br>Dein Squad. Deine Statistiken.</p>
+        <div id="soldier-details">
+          @if (players[selected()]; as player) { <app-profile-card [player]="player" /> }
+        </div>
+      }
+      <p class="data-note">STATISTIKEN VIA GAMETOOLS<br>BF6 · EA · MULTIPLAYER</p>
+    </section>
+    <section class="soldiers" aria-label="Soldaten auswählen">
+      <div class="scene-top"><span>MV / EINSATZTEAM</span><span>2 MITGLIEDER</span></div>
+      <div class="soldier-scene">
+        
+        <div class="soldier-buttons">
+          @for (player of players; track $index) {
+            <button class="soldier" type="button" [class.selected]="view() === 'squad' && selected() === $index" [attr.aria-pressed]="view() === 'squad' && selected() === $index" [attr.aria-label]="player.name + ': Statistiken anzeigen'" (click)="selectSoldier($index)">
+              <img class="soldier-image" [src]="player.image" [alt]="player.imageAlt" width="1024" height="1536"><span class="selection-marker" aria-hidden="true">{{ view() === 'squad' && selected() === $index ? '▼' : '+' }}</span>
+              <span class="soldier-label"><span class="slot-number">0{{ $index + 1 }} / MV</span><strong>{{ player.name }}</strong><span class="selection-caption">{{ view() === 'squad' && selected() === $index ? 'AUSGEWÄHLT' : 'AUSWÄHLEN' }}</span></span>
+            </button>
+          }
+        </div>
+      </div>
+      <div class="scene-bottom"><span>↵ SOLDAT AUSWÄHLEN</span><span>GEMEINSAM REIN. GEMEINSAM RAUS.</span></div>
+    </section>
+  </main>
+  <footer><span><b>MV</b> / BATTLEFIELD COMMUNITY</span><span>Inoffizielles Fanprojekt · Nicht mit EA oder DICE verbunden.</span></footer>
+</div>
+
+
+
+

@@ -1,0 +1,26 @@
+﻿:host { display: block; }
+.player-panel { border-top: 1px solid var(--line); padding-top: 22px; }
+.player-heading { display:flex; justify-content:space-between; align-items:center; font-size:10px; letter-spacing:1.5px; color:var(--muted); }
+.member-badge { background:var(--accent); color:#151813; padding:5px 8px; font-weight:700; }
+h2 { font:600 clamp(28px,2.6vw,40px)/1.1 'Barlow Condensed',sans-serif; margin:12px 0; overflow-wrap:anywhere; }
+.player-description { color:var(--muted); font-size:14px; line-height:1.5; margin:0 0 20px; }
+.stats-panel { min-height:150px; }
+.main-stat { display:flex; align-items:center; justify-content:space-between; height:114px; padding:20px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+.main-stat > span { font-size:18px; font-weight:600; }
+small { display:block; margin-top:6px; color:var(--muted); font-size:9px; letter-spacing:1.5px; }
+.main-stat strong { font:600 72px/1 'Barlow Condensed',sans-serif; color:var(--accent); font-variant-numeric:tabular-nums; }
+.tracker-link { display:flex; justify-content:space-between; background:#e5e8e0; color:#151813; padding:15px; font-size:11px; font-weight:700; letter-spacing:.8px; }
+.tracker-link:hover { background:var(--accent); }
+.status-message { color:var(--muted); line-height:1.6; padding-top:25px; }
+.retry-button { padding:12px; border:1px solid var(--line); background:transparent; color:var(--text); cursor:pointer; }
+.extra-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:20px 0 24px; }
+.extra-stats dt { color:var(--muted); font-size:10px; letter-spacing:1px; }
+.extra-stats dd { margin:7px 0 0; height:36px; display:flex; align-items:center; font:600 30px/36px 'Barlow Condensed',sans-serif; font-variant-numeric:tabular-nums; }
+.partial-note { font-size:12px; color:var(--muted); }
+.stats-status { min-height:74px; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:5px; padding-bottom:12px; color:var(--muted); font-size:12px; }
+.stats-status .retry-button { padding:6px 10px; }
+.skeleton { display:block; width:70%; max-width:80px; height:26px; border-radius:2px; background:var(--line); animation:loading-pulse 1.6s ease-in-out infinite; }
+.skeleton-kd { width:100px; max-width:none; height:60px; }
+.sr-only { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+@keyframes loading-pulse { 0%,100% { opacity:.4; } 50% { opacity:.85; } }
+@media(prefers-reduced-motion:reduce) { .skeleton { animation:none; opacity:.6; } }
