@@ -3,8 +3,8 @@ import { inject, Injectable } from '@angular/core';
 import { catchError, finalize, forkJoin, map, Observable, of, shareReplay, tap, timeout } from 'rxjs';
 import { topWeapons, type WeaponStats } from './weapon-stats';
 import { parseAccuracy } from './accuracy';
-export interface Bf6Stats { killDeath: number; accuracy: number | null; rank: number | null; hoursPlayed: number | null; matchesPlayed: number | null; shotsFired: number | null; weapons: WeaponStats[]; capturedAt?: string; }
-type ProfileResponse = { playerProfiles?: { playerCard?: { rank?: unknown } }[] };
+export interface Bf6Stats { killDeath: number; accuracy: number | null; rank: number | null; rankName: string | null; hoursPlayed: number | null; matchesPlayed: number | null; shotsFired: number | null; weapons: WeaponStats[]; capturedAt?: string; }
+type ProfileResponse = { playerProfiles?: { playerCard?: { rank?: unknown }; rankName?: unknown }[] };
 type Snapshot = { players: Record<string, { capturedAt: string; response: Record<string, unknown>; profile: ProfileResponse }> };
 @Injectable({ providedIn: 'root' })
 export class Bf6StatsService {
@@ -51,6 +51,14 @@ export class Bf6StatsService {
       const killDeath = number(response?.['infantryKillDeath']);
       if (killDeath === null) throw new Error('Keine gültige K/D erhalten.');
       const seconds = number(response['secondsPlayed']);
-      return { killDeath, accuracy: parseAccuracy(response['accuracy']), rank: number(profile?.playerProfiles?.[0]?.playerCard?.rank), hoursPlayed: seconds === null ? null : seconds / 3600, matchesPlayed: number(response['matchesPlayed']), shotsFired: number(response['shotsFired'] ?? response['shotsfired']), weapons: topWeapons(response['weapons']) };
+      const gameModeGroups = response['gameModeGroups'];
+      const allModes = Array.isArray(gameModeGroups) ? gameModeGroups.find(group => group?.gamemodeName === 'All') : undefined;
+      const matchesPlayed = number(allModes?.matches);
+      const weaponGroups = response['weaponGroups'];
+      const allWeapons = Array.isArray(weaponGroups) ? weaponGroups.find(group => group?.id === 'wp_temp') : undefined;
+      const shotsFired = number(allWeapons?.shotsFired);
+      const playerProfile = profile?.playerProfiles?.[0];
+      const rankName = typeof playerProfile?.rankName === 'string' ? playerProfile.rankName.trim() || null : null;
+      return { killDeath, accuracy: parseAccuracy(response['accuracy']), rank: number(playerProfile?.playerCard?.rank), rankName, hoursPlayed: seconds === null ? null : seconds / 3600, matchesPlayed, shotsFired, weapons: topWeapons(response['weapons']) };
   }
 }

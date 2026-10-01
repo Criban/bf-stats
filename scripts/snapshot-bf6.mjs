@@ -25,8 +25,8 @@ for (const name of names) {
   }
   players[name] = {
     capturedAt: new Date().toISOString(),
-    response: Object.fromEntries(['infantryKillDeath', 'accuracy', 'secondsPlayed', 'matchesPlayed', 'shotsFired', 'weapons'].map(key => [key, key === 'shotsFired' ? stats.shotsFired ?? stats.shotsfired : stats[key]])),
-    profile: { playerProfiles: [{ playerCard: { rank } }] }
+    response: Object.fromEntries(['infantryKillDeath', 'accuracy', 'secondsPlayed', 'gameModeGroups', 'weaponGroups', 'weapons'].map(key => [key, stats[key]])),
+    profile: { playerProfiles: [{ playerCard: { rank }, rankName: profile.playerProfiles?.[0]?.rankName }] }
   };
   console.log(`${name}: snapshot captured (${players[name].capturedAt})`);
 }

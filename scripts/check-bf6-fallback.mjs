@@ -20,6 +20,27 @@ try {
   const { Bf6StatsService } = await import(pathToFileURL(path.join(temporary, 'bf6-stats.service.mjs')));
   const snapshot = JSON.parse(await readFile(path.join(root, 'public/data/bf6-stats-snapshot.json'), 'utf8'));
   const name = 'MV-8lackh4wk';
+  const parser = runInInjectionContext(Injector.create({ providers: [{ provide: HttpClient, useValue: {} }] }), () => new Bf6StatsService());
+  const parseMatches = gameModeGroups => parser.parseStats({ infantryKillDeath: 2, matchesPlayed: 999, gameModes: [{ matches: 888 }], maps: [{ wins: 258, losses: 196 }], gameModeGroups }, {}).matchesPlayed;
+  assert.equal(parseMatches([{ gamemodeName: 'Conquest', matches: 123 }, { gamemodeName: 'All', matches: 576 }]), 576);
+  assert.equal(parseMatches([{ gamemodeName: 'All', matches: '576' }]), 576);
+  assert.equal(parseMatches([{ gamemodeName: 'All', matches: 0 }]), 0);
+  assert.equal(parseMatches([]), null);
+  assert.equal(parseMatches(undefined), null);
+  assert.equal(parseMatches([{ gamemodeName: 'Conquest', matches: 123 }]), null);
+  assert.equal(parseMatches([{ gamemodeName: 'All', matches: -1 }]), null);
+  assert.equal(parseMatches([{ gamemodeName: 'All' }]), null);
+  console.log('PASS matches from All gameModeGroups entry, zero and missing/invalid counts');
+  const parseShots = weaponGroups => parser.parseStats({ infantryKillDeath: 2, shotsFired: 999, weaponGroups }, {}).shotsFired;
+  assert.equal(parseShots([{ id: 'wp_other', shotsFired: 123 }, { id: 'wp_temp', shotsFired: 236067 }]), 236067);
+  assert.equal(parseShots([{ id: 'wp_temp', shotsFired: '236067' }]), 236067);
+  assert.equal(parseShots([{ id: 'wp_temp', shotsFired: 0 }]), 0);
+  assert.equal(parseShots(undefined), null);
+  assert.equal(parseShots([]), null);
+  assert.equal(parseShots([{ id: 'wp_other', shotsFired: 123 }]), null);
+  assert.equal(parseShots([{ id: 'wp_temp', shotsFired: -1 }]), null);
+  assert.equal(parseShots([{ id: 'wp_temp' }]), null);
+  console.log('PASS shots from wp_temp weapon group, zero and missing/invalid counts');
   for (const mode of ['live', 'stats-error', 'profile-error', 'invalid-kd', 'missing-snapshot']) {
     const calls = [];
     const http = { get(url) {
@@ -37,7 +58,8 @@ try {
     } else {
       const result = await firstValueFrom(service.getStats(name));
       assert.equal(result.killDeath, Number(snapshot.players[name].response.infantryKillDeath));
-      assert.equal(result.shotsFired, Number(snapshot.players[name].response.shotsFired));
+      assert.equal(result.shotsFired, Number(snapshot.players[name].response.weaponGroups.find(group => group.id === 'wp_temp').shotsFired));
+      assert.equal(result.matchesPlayed, Number(snapshot.players[name].response.gameModeGroups.find(group => group.gamemodeName === 'All').matches));
       assert.ok(Number.isFinite(result.shotsFired));
       assert.ok(result.weapons.length > 0);
       assert.equal(result.capturedAt, mode === 'live' ? undefined : snapshot.players[name].capturedAt);

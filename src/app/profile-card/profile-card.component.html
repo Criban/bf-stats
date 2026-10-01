@@ -15,7 +15,7 @@
       @else { <strong>{{ state.status === 'ready' ? state.killDeath : '—' }}</strong> }
     </div>
     <dl class="extra-stats">
-      <div><dt>RANG</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.rank : '—' }} }</dd></div>
+      <div><dt>RANG</dt><dd class="rank-value">@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.rank : '—' }} @if (state.status === 'ready' && state.rankName) { <span class="rank-name">{{ state.rankName }}</span> } }</dd></div>
       <div><dt>STUNDEN</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.hours : '—' }} }</dd></div>
       <div><dt>MATCHES</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.matches : '—' }} }</dd></div>
       <div><dt>TREFFGENAUIGKEIT</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.accuracy : '—' }} }</dd></div>
