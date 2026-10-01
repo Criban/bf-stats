@@ -1,6 +1,5 @@
 <article class="player-panel" [attr.aria-labelledby]="'player-' + player().id">
-  <div class="player-heading"><span>SQUAD-MITGLIED @if (!player().privateProfile) { / {{ player().id }} }</span><span class="member-badge">MV</span></div>
-  <h2 [id]="'player-' + player().id">{{ player().name }}</h2>
+  <div class="player-heading"><span>MOTTO</span><span class="member-badge">MV</span></div>
   <p class="player-description">{{ player().description }}</p>
   @let state = stats();
   @if (player().privateProfile) {
@@ -19,8 +18,9 @@
       <div><dt>RANG</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.rank : '—' }} }</dd></div>
       <div><dt>STUNDEN</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.hours : '—' }} }</dd></div>
       <div><dt>MATCHES</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.matches : '—' }} }</dd></div>
+      <div><dt>TREFFGENAUIGKEIT</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.accuracy : '—' }} }</dd></div>
+      <div><dt>ABGEFEUERTE SCHÜSSE</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.shots : '—' }} }</dd></div>
     </dl>
-    <div class="accuracy-stat"><span>TREFFGENAUIGKEIT</span>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { <strong>{{ state.status === 'ready' ? state.accuracy : '—' }}</strong> }</div>
     <section class="weapon-stats" aria-label="Waffen mit den meisten Kills">
       <h3>TOP WAFFEN <span>KILLS</span></h3>
       @if (state.status === 'loading') {
@@ -40,7 +40,14 @@
     @switch (state.status) {
       @case ('loading') { <span>Statistiken werden geladen …</span> }
       @case ('error') { <span>Statistiken nicht verfügbar.</span><button type="button" class="retry-button" (click)="retryStats()">Erneut laden ↻</button> }
-      @case ('ready') { @if (state.rank === '—') { <span>Rang nicht verfügbar.</span><button type="button" class="retry-button" (click)="retryStats()">Erneut laden ↻</button> } @else { <span class="sr-only">Statistiken für {{ player().name }} geladen.</span> } }
+      @case ('ready') {
+        @if (state.capturedAt) {
+          <span>API nicht verfügbar. Gespeicherter Abzug vom {{ state.capturedAt }} Uhr (Berlin).</span>
+          <button type="button" class="retry-button" (click)="retryStats()">Live-Daten erneut laden ↻</button>
+        } @else if (state.rank === '—') {
+          <span>Rang nicht verfügbar.</span><button type="button" class="retry-button" (click)="retryStats()">Erneut laden ↻</button>
+        } @else { <span class="sr-only">Statistiken für {{ player().name }} geladen.</span> }
+      }
     }
   </div>
   }

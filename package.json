@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node scripts/angular.cjs serve --host 127.0.0.1",
-    "build": "node scripts/angular.cjs build"
+    "build": "node scripts/angular.cjs build",
+    "snapshot:bf6": "node scripts/snapshot-bf6.cjs"
   },
   "dependencies": {
     "@angular/common": "^21.0.0",

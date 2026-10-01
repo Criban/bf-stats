@@ -1,0 +1,63 @@
+import '@angular/compiler';
+import { Injector, runInInjectionContext } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom, of, throwError } from 'rxjs';
+import ts from 'typescript';
+import assert from 'node:assert/strict';
+import { mkdtemp, readFile, writeFile, unlink, rmdir } from 'node:fs/promises';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import path from 'node:path';
+
+const root = fileURLToPath(new URL('../', import.meta.url));
+const temporary = await mkdtemp(path.join(root, 'scripts', '.bf6-check-'));
+const files = ['accuracy', 'weapon-stats', 'bf6-stats.service', 'history-totals', 'battlefield-history'];
+try {
+  for (const file of files) {
+    const source = await readFile(path.join(root, file === 'history-totals' || file === 'battlefield-history' ? 'src/app/data' : 'src/app/services', `${file}.ts`), 'utf8');
+    const compiled = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022, experimentalDecorators: true } }).outputText;
+    await writeFile(path.join(temporary, `${file}.mjs`), compiled.replace(/from '\.\/(accuracy|weapon-stats)'/g, "from './$1.mjs'"));
+  }
+  const { Bf6StatsService } = await import(pathToFileURL(path.join(temporary, 'bf6-stats.service.mjs')));
+  const snapshot = JSON.parse(await readFile(path.join(root, 'public/data/bf6-stats-snapshot.json'), 'utf8'));
+  const name = 'MV-8lackh4wk';
+  for (const mode of ['live', 'stats-error', 'profile-error', 'invalid-kd', 'missing-snapshot']) {
+    const calls = [];
+    const http = { get(url) {
+      calls.push(url);
+      if (url.startsWith('data/')) return mode === 'missing-snapshot' ? throwError(() => new Error('Missing snapshot')) : of(snapshot);
+      if ((mode === 'stats-error' || mode === 'missing-snapshot') && url.includes('/stats/')) return throwError(() => new Error('API failure'));
+      if (mode === 'profile-error' && url.includes('/profile/')) return throwError(() => new Error('Profile failure'));
+      if (url.includes('/profile/')) return of(snapshot.players[name].profile);
+      return of(mode === 'invalid-kd' ? { infantryKillDeath: null } : snapshot.players[name].response);
+    } };
+    const injector = Injector.create({ providers: [{ provide: HttpClient, useValue: http }] });
+    const service = runInInjectionContext(injector, () => new Bf6StatsService());
+    if (mode === 'missing-snapshot') {
+      await assert.rejects(firstValueFrom(service.getStats(name)), /Missing snapshot/);
+    } else {
+      const result = await firstValueFrom(service.getStats(name));
+      assert.equal(result.killDeath, Number(snapshot.players[name].response.infantryKillDeath));
+      assert.equal(result.shotsFired, Number(snapshot.players[name].response.shotsFired));
+      assert.ok(Number.isFinite(result.shotsFired));
+      assert.ok(result.weapons.length > 0);
+      assert.equal(result.capturedAt, mode === 'live' ? undefined : snapshot.players[name].capturedAt);
+      assert.equal(calls.includes('data/bf6-stats-snapshot.json'), mode !== 'live');
+    }
+    console.log(`PASS ${mode}`);
+  }
+  const { historyTotals } = await import(pathToFileURL(path.join(temporary, 'history-totals.mjs')));
+  const { BATTLEFIELD_HISTORY } = await import(pathToFileURL(path.join(temporary, 'battlefield-history.mjs')));
+  const bf6 = { hoursPlayed: 10.25, shotsFired: 2000, matchesPlayed: 12 };
+  const totals = historyTotals(BATTLEFIELD_HISTORY['353727533'], bf6);
+  assert.deepEqual(totals, { hours: { value: 709.6958333333333, partial: false }, shots: { value: 1321076, partial: false }, matches: { value: 1755, partial: false } });
+  const hawkTotals = historyTotals(BATTLEFIELD_HISTORY['1811857213'], bf6);
+  assert.deepEqual(hawkTotals, { hours: { value: 747.8958333333334, partial: false }, shots: { value: 1672500, partial: false }, matches: { value: 2254, partial: false } });
+  assert.equal(historyTotals([{ game: 'Battlefield 6', stats: [], totals: bf6 }], bf6).shots.value, 2000);
+  assert.deepEqual(historyTotals([], null).shots, { value: null, partial: true });
+  assert.deepEqual(historyTotals([], { ...bf6, shotsFired: 0 }).shots, { value: 0, partial: false });
+  assert.deepEqual(historyTotals(BATTLEFIELD_HISTORY['353727533'], { ...bf6, shotsFired: null }).shots, { value: 1319076, partial: true });
+  console.log('PASS history totals, BF6 counted once, missing values and zero');
+} finally {
+  for (const file of files) await unlink(path.join(temporary, `${file}.mjs`)).catch(() => {});
+  await rmdir(temporary);
+}

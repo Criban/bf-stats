@@ -1,0 +1,38 @@
+import { mkdir, writeFile, rename } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+
+const names = ['MV-8lackh4wk', 'MV-Criban'];
+const endpoint = 'https://api.gametools.network/bf6/';
+const players = {};
+for (const name of names) {
+  const common = { name, platform: 'ea', skip_battlelog: 'true', lang: 'de-DE', filter: '{"scopes": [{"category": "global", "name": "global"}]}' };
+  const fetchData = async (path, params) => {
+    const response = await fetch(`${endpoint}${path}/?${new URLSearchParams(params)}`, { signal: AbortSignal.timeout(30000) });
+    if (!response.ok) throw new Error(`${name}: ${path} returned HTTP ${response.status}`);
+    return response.json();
+  };
+  const [stats, profile] = await Promise.all([
+    fetchData('stats', { ...common, categories: 'multiplayer', raw: 'false', format_values: 'true', seperation: 'false' }),
+    fetchData('profile', common)
+  ]);
+  const kd = stats.infantryKillDeath;
+  if (kd === null || kd === undefined || kd === '' || !Number.isFinite(Number(kd)) || Number(kd) < 0) {
+    throw new Error(`${name}: no valid K/D; existing snapshot preserved.`);
+  }
+  const rank = profile.playerProfiles?.[0]?.playerCard?.rank;
+  if (rank === null || rank === undefined || !Number.isFinite(Number(rank))) {
+    throw new Error(`${name}: no valid rank; existing snapshot preserved.`);
+  }
+  players[name] = {
+    capturedAt: new Date().toISOString(),
+    response: Object.fromEntries(['infantryKillDeath', 'accuracy', 'secondsPlayed', 'matchesPlayed', 'shotsFired', 'weapons'].map(key => [key, key === 'shotsFired' ? stats.shotsFired ?? stats.shotsfired : stats[key]])),
+    profile: { playerProfiles: [{ playerCard: { rank } }] }
+  };
+  console.log(`${name}: snapshot captured (${players[name].capturedAt})`);
+}
+const directory = fileURLToPath(new URL('../public/data/', import.meta.url));
+const destination = fileURLToPath(new URL('../public/data/bf6-stats-snapshot.json', import.meta.url));
+await mkdir(directory, { recursive: true });
+await writeFile(`${destination}.tmp`, JSON.stringify({ players }, null, 2) + '\n');
+await rename(`${destination}.tmp`, destination);
+console.log('Saved public/data/bf6-stats-snapshot.json');

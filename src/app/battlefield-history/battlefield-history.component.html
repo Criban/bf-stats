@@ -1,0 +1,48 @@
+<section id="battlefield-history" class="history-panel" [class.open]="open()" [attr.inert]="!open() ? '' : null" [attr.aria-hidden]="!open()" aria-label="Historische Battlefield-Statistiken">
+  <ng-container [ngTemplateOutlet]="historyContent" />
+</section>
+<dialog #historyDialog id="mobile-battlefield-history" class="history-dialog" aria-label="Historische Battlefield-Statistiken" (close)="onDialogClose()" (click)="$event.target === historyDialog && close()">
+  <div class="history-dialog-header">
+    <span class="eyebrow">BATTLEFIELD / HISTORIE</span>
+    <button class="history-toggle" type="button" autofocus (click)="close()">SCHLIESSEN ×</button>
+  </div>
+  <ng-container [ngTemplateOutlet]="historyContent" />
+</dialog>
+  <ng-template #historyContent>
+          <p class="eyebrow">BATTLEFIELD / HISTORIE</p>
+          <h2>{{ player().name }}</h2>
+          <section class="history-entry history-overall" aria-label="Gesamtstatistiken">
+            <h3>OVERALL / ALLE TEILE</h3>
+            @let totals = overallStats();
+            <dl>
+              <div><dt>Spielzeit gesamt</dt><dd>{{ formatTotal(totals.hours.value, 1) }} @if (totals.hours.value !== null) { h }</dd></div>
+              <div><dt>Abgefeuerte Schüsse gesamt</dt><dd>{{ formatTotal(totals.shots.value) }}</dd></div>
+              <div><dt>Matches gesamt</dt><dd>{{ formatTotal(totals.matches.value) }}</dd></div>
+            </dl>
+            @if (stats()?.capturedAt; as capturedAt) {
+              <p class="history-date">BF6-Abzug vom {{ formatSnapshotDate(capturedAt) }} Uhr (Berlin).</p>
+            }
+          </section>
+          <ol class="history-timeline" aria-label="Battlefield-Timeline">
+            @for (entry of entries(); track $index) {
+              @if (entry.period; as period) {
+                <li [class.current]="!period.to">
+                  <span class="timeline-period">@if (period.from) { {{ period.from }} – {{ period.to ?? 'heute' }} } @else { Bis {{ period.to }} }</span>
+                  <strong>{{ entry.game }}</strong>
+                  @if (!period.to) { <span class="timeline-current">AKTUELL</span> }
+                </li>
+              }
+            }
+          </ol>
+          @for (entry of entries(); track $index) {
+            @if (entry.stats.length) {
+            <article class="history-entry">
+              <h3>{{ entry.game }}</h3>
+              @if (entry.recordedAt) { <p class="history-date">Stand: {{ entry.recordedAt }}</p> }
+              <dl>@for (stat of entry.stats; track $index) { <div><dt>{{ stat.label }}</dt><dd>{{ stat.value }}</dd></div> }</dl>
+            </article>
+            }
+          } @empty {
+            <p class="history-empty">Für diesen Soldaten sind noch keine historischen Statistiken hinterlegt.</p>
+          }
+  </ng-template>

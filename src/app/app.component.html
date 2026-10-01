@@ -3,7 +3,7 @@
   <header class="topbar">
     <a class="brand" href="./">BATTLEFIELD<span>MV / MOST VALUABLE</span></a>
     <nav aria-label="Hauptmenü">
-      <button type="button" [class.active]="view() === 'clan'" [attr.aria-current]="view() === 'clan' ? 'page' : null" (click)="view.set('clan'); historyOpen.set(false)">UNSER CLAN</button>
+      <button type="button" [class.active]="view() === 'clan'" [attr.aria-current]="view() === 'clan' ? 'page' : null" (click)="view.set('clan'); closeHistory()">UNSER CLAN</button>
       <button type="button" [class.active]="view() === 'squad'" [attr.aria-current]="view() === 'squad' ? 'page' : null" (click)="view.set('squad')">SQUAD</button>
     </nav>
   </header>
@@ -14,13 +14,12 @@
         <p class="intro">Gemeinsam rein. Gemeinsam raus.</p>
         <div class="clan-summary"><span>UNSER DERZEITIGES SPIEL</span><strong>Battlefield 6</strong></div>
       } @else {
-        <p class="eyebrow">BATTLEFIELD 6 / MULTIPLAYER</p><h1>UNSER SQUAD<span>.</span></h1>
-        <p class="intro">Deine Statistiken.</p>
+        <p class="eyebrow">BATTLEFIELD 6 / MULTIPLAYER</p><h1>{{ players[selected()].name.startsWith('MV-') ? players[selected()].name.slice(3) : players[selected()].name }}<span>.</span></h1>
         <div id="soldier-details">
-          @if (players[selected()]; as player) { <app-profile-card [player]="player" /> }
+          @if (players[selected()]; as player) { <app-profile-card [player]="player" (statsLoaded)="recordStats($event)" /> }
         </div>
         @if (hasHistoryStats()) {
-          <button class="history-toggle" type="button" aria-controls="battlefield-history" [attr.aria-expanded]="historyOpen()" (click)="historyOpen.set(!historyOpen())">{{ historyOpen() ? 'ZURÜCK ZUM SQUAD' : 'BATTLEFIELD-HISTORIE' }}</button>
+          <button class="history-toggle" type="button" aria-controls="battlefield-history mobile-battlefield-history" [attr.aria-expanded]="historyOpen()" (click)="toggleHistory()">{{ historyOpen() ? 'ZURÜCK ZUM SQUAD' : 'BATTLEFIELD-HISTORIE' }}</button>
         }
       }
       <p class="data-note">STATISTIKEN VIA GAMETOOLS<br>BF6 · EA · MULTIPLAYER</p>
@@ -32,42 +31,18 @@
         <div class="soldier-buttons" [style.--soldier-count]="players.length">
           @for (player of players; track $index) {
             <button class="soldier" type="button" [attr.inert]="historyOpen() && view() === 'squad' && selected() !== $index ? '' : null" [class.selected]="view() === 'squad' && selected() === $index" [attr.aria-pressed]="view() === 'squad' && selected() === $index" [attr.aria-label]="player.name + (player.privateProfile ? ': Privates Profil anzeigen' : ': Statistiken anzeigen')" (click)="selectSoldier($index)">
-              <img class="soldier-image" [src]="player.image" [alt]="player.imageAlt" width="1024" height="1536">
+              <span class="soldier-portrait"><img class="soldier-image" [src]="player.image" [alt]="player.imageAlt" width="1024" height="1536"></span>
               @if (view() !== 'squad' || selected() !== $index) { <span class="selection-marker" aria-hidden="true">+</span> }
               <span class="soldier-label"><span class="slot-number">0{{ $index + 1 }} / MV</span><strong>{{ player.name }}</strong><span class="selection-caption">{{ view() === 'squad' && selected() === $index ? 'AUSGEWÄHLT' : 'AUSWÄHLEN' }}</span></span>
             </button>
           }
         </div>
-        <section id="battlefield-history" class="history-panel" [attr.inert]="view() !== 'squad' || !historyOpen() ? '' : null" [attr.aria-hidden]="view() !== 'squad' || !historyOpen()" aria-label="Historische Battlefield-Statistiken">
-          <p class="eyebrow">BATTLEFIELD / HISTORIE</p>
-          <h2>{{ players[selected()].name }}</h2>
-          <ol class="history-timeline" aria-label="Battlefield-Timeline">
-            @for (entry of history[players[selected()].id] ?? []; track $index) {
-              @if (entry.period; as period) {
-                <li [class.current]="!period.to">
-                  <span class="timeline-period">{{ period.from }} – {{ period.to ?? 'heute' }}</span>
-                  <strong>{{ entry.game }}</strong>
-                  @if (!period.to) { <span class="timeline-current">AKTUELL</span> }
-                </li>
-              }
-            }
-          </ol>
-          @for (entry of history[players[selected()].id] ?? []; track $index) {
-            @if (entry.stats.length) {
-            <article class="history-entry">
-              <h3>{{ entry.game }}</h3>
-              @if (entry.recordedAt) { <p class="history-date">Stand: {{ entry.recordedAt }}</p> }
-              <dl>@for (stat of entry.stats; track $index) { <div><dt>{{ stat.label }}</dt><dd>{{ stat.value }}</dd></div> }</dl>
-            </article>
-            }
-          } @empty {
-            <p class="history-empty">Für diesen Soldaten sind noch keine historischen Statistiken hinterlegt.</p>
-          }
-        </section>
+        <app-battlefield-history [player]="players[selected()]" [stats]="selectedStats()" [(open)]="historyOpen" />
       </div>
       <div class="scene-bottom"><span>↵ SOLDAT AUSWÄHLEN</span></div>
     </section>
   </main>
+
   <footer><span><b>MV</b> / BATTLEFIELD COMMUNITY</span><span>Inoffizielles Fanprojekt · Nicht mit EA oder DICE verbunden.</span></footer>
 </div>
 
