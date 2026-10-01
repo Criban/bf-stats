@@ -1,8 +1,8 @@
-﻿# MV / Battlefield
+# MV / Battlefield
 
-Persönliche, responsive Battlefield-Fanseite für den Clan MV als interaktives Spielmenü. Zwei Soldaten und eine Silhouette sind per Klick oder Tastatur auswählbar. Links erscheinen die BF6-K/D, Rang, gespielte Stunden, Matches und der Tracker-Link des ausgewählten Spielers. MV-Criban und MV-8lackh4wk belegen die ersten zwei Plätze; der dritte Platz ist ausdrücklich frei und lösen keine API-Abfragen aus.
+Persönliche, responsive Battlefield-Fanseite für den Clan MV als interaktives Spielmenü. MV-8lackh4wk, MV-Criban, MV-KingCoffee und MV-54bI44 sind per Klick oder Tastatur auswählbar. Die Statistikansicht zeigt die BF6-Werte des ausgewählten Spielers. MV-KingCoffee und MV-54bI44 haben private Profile und lösen keine API-Abfragen aus. MV-54bI44 sitzt während seiner Einsatzpause auf einem Campingstuhl. Sein Porträt liegt in `public/images/54bi44-camping-chair.png`.
 
-Die Spielhistorie ist vorerst ausgeblendet; eine Timeline ist für später vorgesehen.
+Die Battlefield-Historie lässt sich für öffentliche Profile öffnen.
 
 ## Lokal starten
 
@@ -26,6 +26,8 @@ Die generierten Soldatenbilder liegen in `public/images/criban.png` und `public/
 Nach Änderungen an `angular.json` den Entwicklungsserver neu starten (`Strg+C`, dann `npm start`), damit neue Asset-Verzeichnisse wie `public/images/` ausgeliefert werden.
 
 ## BF6-Statistik-Abzug
+
+Erfolgreich geladene API-Statistiken werden pro Spieler für fünf Minuten im Arbeitsspeicher gecached. Beim Spielerwechsel werden sie wiederverwendet; parallele Abfragen für denselben Spieler teilen einen Request. Nach einem Neuladen der Seite beginnt der Cache neu. „Erneut laden“ leert den Cache des ausgewählten Spielers. Fehler und lokale Statistik-Abzüge werden nicht gecached.
 
 Die BF6-Ansicht zeigt auch die abgefeuerten Schüsse (`shotsFired`). Die Historie summiert Spielzeit, Schüsse und Matches aus den numerischen `totals` der Einträge in `src/app/data/battlefield-history.ts` und den aktuellen BF6-Werten (bei API-Problemen aus dem lokalen Abzug). BF6 wird einmal gezählt. Fehlende Werte werden nicht als null Schüsse oder null Matches interpretiert, sondern als unvollständige Summe gekennzeichnet. Bei neuen historischen Einträgen die numerischen `totals` zusammen mit den angezeigten `stats` pflegen.
 

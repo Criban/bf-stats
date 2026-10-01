@@ -25,7 +25,9 @@ h1 { font:700 clamp(42px,4.1vw,70px)/.95 'Barlow Condensed',Impact,sans-serif; m
 .squad-art { display:block; width:100%; height:100%; object-fit:cover; }
 .soldier-buttons { position:absolute; inset:0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); }
 .soldier { position:relative; display:flex; align-items:flex-end; min-width:0; border:0; border-bottom:3px solid transparent; padding:0; background:linear-gradient(transparent 66%,#090e0be8 100%); color:white; cursor:pointer; text-align:left; transition:background-color .2s; }
-.soldier:hover { background-color:#e7ecc011; }
+.soldier:not(:disabled):hover { background-color:#e7ecc011; }
+.soldier.inactive { cursor:default; }
+.soldier.inactive .soldier-image { opacity:.65; }
 .soldier.selected { border-bottom-color:var(--accent); background:radial-gradient(ellipse at 50% 40%,#d5dcac38,transparent 75%),#d5dcac12; }
 .soldier.selected::after { content:''; position:absolute; inset:0; border:2px solid var(--accent); pointer-events:none; z-index:1; }
 .soldier.selected .soldier-image { filter:brightness(1.12) drop-shadow(0 0 18px #d5dcac45); }

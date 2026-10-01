@@ -12,6 +12,7 @@ export interface PlayerProfile {
   image: string;
   imageAlt: string;
   privateProfile?: boolean;
+  inactive?: boolean;
 }
 
 @Component({
@@ -44,6 +45,7 @@ export class ProfileCardComponent {
   }
 
   retryStats(): void {
+    this.statsService.invalidateCache(this.player().name);
     this.reload.next();
   }
 }

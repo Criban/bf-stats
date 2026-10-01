@@ -62,4 +62,5 @@ export const BATTLEFIELD_HISTORY: Partial<Record<string, BattlefieldHistoryEntry
     { game: 'Battlefield 6', period: { from: 'Oktober 2025' }, stats: [] },
   ],
   'mv-kingcoffee': [],
+  'mv-54bi44': [],
 };

@@ -42,6 +42,23 @@ try {
       assert.ok(result.weapons.length > 0);
       assert.equal(result.capturedAt, mode === 'live' ? undefined : snapshot.players[name].capturedAt);
       assert.equal(calls.includes('data/bf6-stats-snapshot.json'), mode !== 'live');
+      const firstCallCount = calls.length;
+      await firstValueFrom(service.getStats(name));
+      assert.equal(calls.length, mode === 'live' ? firstCallCount : firstCallCount * 2,
+        'Only successful API responses should be cached');
+      if (mode === 'live') {
+        service.invalidateCache(name);
+        await firstValueFrom(service.getStats(name));
+        assert.equal(calls.length, firstCallCount * 2, 'Reload must bypass cached stats');
+        const realNow = Date.now;
+        try {
+          Date.now = () => realNow() + 5 * 60 * 1000 + 1;
+          await firstValueFrom(service.getStats(name));
+          assert.equal(calls.length, firstCallCount * 3, 'Expired stats must be fetched again');
+        } finally {
+          Date.now = realNow;
+        }
+      }
     }
     console.log(`PASS ${mode}`);
   }
