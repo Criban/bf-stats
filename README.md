@@ -6,6 +6,8 @@ Die Battlefield-Historie lässt sich für öffentliche Profile öffnen.
 
 ## Lokal starten
 
+Im Menü **VIDEOS** stehen die YouTube-Shorts mit Vorschaubildern und einem eingebetteten Player im Hochformat zur Auswahl. Die Liste wird in `src/app/data/videos.ts` gepflegt: Für weitere Videos die YouTube-ID und einen Titel ergänzen. Die Titel „Short 01“ bis „Short 10“ können dort durch eigene Beschreibungen ersetzt werden. Der Player verwendet `youtube-nocookie.com`; Vorschauen werden von YouTube geladen. Ob ein Video eingebettet abgespielt werden kann, hängt von seinen YouTube-Einstellungen ab. Jeder Clip hat zusätzlich einen Link zu YouTube.
+
 ```sh
 npm install
 npm start

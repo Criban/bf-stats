@@ -4,9 +4,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { ProfileCardComponent, type PlayerProfile } from './app/profile-card/profile-card.component';
 import { BattlefieldHistoryComponent } from './app/battlefield-history/battlefield-history.component';
 import type { Bf6Stats } from './app/services/bf6-stats.service';
-@Component({ selector: 'app-root', standalone: true, imports: [ProfileCardComponent, BattlefieldHistoryComponent], templateUrl: './app/app.component.html' })
+import { VideosComponent } from './app/videos/videos.component';
+@Component({ selector: 'app-root', standalone: true, imports: [ProfileCardComponent, BattlefieldHistoryComponent, VideosComponent], templateUrl: './app/app.component.html' })
 export class AppComponent {
-  readonly view = signal<'squad' | 'clan'>('clan');
+  readonly view = signal<'squad' | 'clan' | 'videos'>('clan');
   readonly selected = signal(0);
   readonly historyOpen = signal(false);
   readonly hasHistoryStats = computed(() => !this.players[this.selected()].privateProfile);

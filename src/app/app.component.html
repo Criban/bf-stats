@@ -5,9 +5,13 @@
     <nav aria-label="Hauptmenü">
       <button type="button" [class.active]="view() === 'clan'" [attr.aria-current]="view() === 'clan' ? 'page' : null" (click)="view.set('clan'); closeHistory()">UNSER CLAN</button>
       <button type="button" [class.active]="view() === 'squad'" [attr.aria-current]="view() === 'squad' ? 'page' : null" (click)="view.set('squad')">SQUAD</button>
+      <button type="button" [class.active]="view() === 'videos'" [attr.aria-current]="view() === 'videos' ? 'page' : null" (click)="view.set('videos'); closeHistory()">VIDEOS</button>
     </nav>
   </header>
-  <main id="main" class="lobby">
+  <main id="main" [class.lobby]="view() !== 'videos'" [class.video-page]="view() === 'videos'">
+    @if (view() === 'videos') {
+      <app-videos />
+    } @else {
     <section class="details" aria-label="Squad-Informationen">
       @if (view() === 'clan') {
         <p class="eyebrow">BATTLEFIELD / CLAN MV</p><h1>MOST<br>VALUABLE<span>.</span></h1>
@@ -41,6 +45,7 @@
       </div>
       <div class="scene-bottom"><span>↵ SOLDAT AUSWÄHLEN</span></div>
     </section>
+    }
   </main>
 
   <footer><span><b>MV</b> / BATTLEFIELD COMMUNITY</span><span>Inoffizielles Fanprojekt · Nicht mit EA oder DICE verbunden.</span></footer>

@@ -1,0 +1,39 @@
+<header class="video-heading">
+  <div>
+    <p class="eyebrow">MV / HIGHLIGHTS</p>
+    <h1>UNSERE SHORTS<span>.</span></h1>
+    <p class="intro">Momente vom Battlefield. Wähle einen Clip und schau rein.</p>
+  </div>
+  <span class="clip-count">{{ videos.length }} CLIPS / YOUTUBE</span>
+</header>
+<div class="video-layout">
+  <section class="watch-panel" aria-label="Video ansehen">
+    <div class="player-frame">
+      <iframe [src]="playerUrl()" [title]="selected().title + ' – YouTube-Player'"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    <div class="player-caption" aria-live="polite">
+      <div><span class="eyebrow">JETZT AUSGEWÄHLT</span><h2>{{ selected().title }}</h2></div>
+      <a [href]="'https://www.youtube.com/shorts/' + selected().id" target="_blank" rel="noopener noreferrer">Auf YouTube ansehen ↗</a>
+    </div>
+    <p class="embed-note">Der Player lädt Inhalte von YouTube. Falls ein Clip hier nicht abspielbar ist, öffne ihn direkt auf YouTube.</p>
+  </section>
+  <section class="clip-library" aria-labelledby="clip-library-title">
+    <div class="library-heading"><h2 id="clip-library-title">CLIP AUSWÄHLEN</h2><span>{{ videos.length }} SHORTS</span></div>
+    <div class="clip-grid">
+      @for (video of videos; track video.id) {
+        <button type="button" class="clip" [class.selected]="selected().id === video.id"
+          [attr.aria-pressed]="selected().id === video.id" [attr.aria-label]="video.title + ' ansehen'"
+          (click)="selected.set(video)">
+          <span class="thumbnail">
+            <img [src]="'https://i.ytimg.com/vi/' + video.id + '/hqdefault.jpg'" alt="" loading="lazy" width="480" height="360">
+            <span class="play-icon" aria-hidden="true">▶</span>
+            <span class="clip-format">SHORT</span>
+          </span>
+          <span class="clip-caption"><strong>{{ video.title }}</strong><span>{{ selected().id === video.id ? 'AUSGEWÄHLT' : 'ANSEHEN ↗' }}</span></span>
+        </button>
+      }
+    </div>
+  </section>
+</div>

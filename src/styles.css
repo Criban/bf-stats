@@ -95,6 +95,9 @@ footer { display:flex; justify-content:space-between; gap:20px; margin:0 3%; pad
 @media(max-width:760px) { .scene-bottom { flex-wrap:wrap; } }
 .details > .history-toggle { width:100%; margin-top:4px; }
 .soldier-portrait { display:contents; }
+.video-page { flex:1; padding:32px 3%; }
+.game-shell:has(.video-page) { height:auto; }
+@media(max-width:760px) { .video-page { padding:24px 20px; } }
 @media(max-width:760px) {
   .soldier-portrait { display:block; height:clamp(160px,42vw,280px); overflow:hidden; }
   .soldier-image { width:180%; max-width:none; margin-left:-40%; height:auto; }
