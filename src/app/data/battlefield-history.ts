@@ -37,8 +37,19 @@ export const BATTLEFIELD_HISTORY: Partial<Record<string, BattlefieldHistoryEntry
   ],
   '353727533': [
     {
+      game: 'Battlefield 1',
+      period: { from: 'Oktober 2016', to: 'November 2018' },
+      totals: { hoursPlayed: (86400 + 16 * 3600 + 10 * 60 + 37) / 3600, shotsFired: 18730, matchesPlayed: 66 + 55 },
+      stats: [
+        { label: 'Infanterie-K/D', value: '1,05' },
+        { label: 'Abgefeuerte Schüsse', value: '18.730' },
+        { label: 'Spielzeit', value: '40,2 h' },
+        { label: 'Matches', value: '121' }
+      ],
+    },
+    {
       game: 'Battlefield V',
-      period: { to: 'November 2021' },
+      period: { from: 'November 2018', to: 'November 2021' },
       totals: { hoursPlayed: (4 * 86400 + 13 * 3600 + 26 * 60 + 45) / 3600, shotsFired: 188136, matchesPlayed: 364 },
       stats: [
         { label: 'K/D', value: '1,32' },
