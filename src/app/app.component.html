@@ -16,7 +16,6 @@
       @if (view() === 'clan') {
         <p class="eyebrow">BATTLEFIELD / CLAN MV</p><h1>MOST<br>VALUABLE<span>.</span></h1>
         <p class="intro">Gemeinsam rein. Gemeinsam raus.</p>
-        <div class="clan-summary"><span>UNSER DERZEITIGES SPIEL</span><strong>Battlefield 6</strong></div>
       } @else {
         <p class="eyebrow">BATTLEFIELD 6 / MULTIPLAYER</p><h1>{{ players[selected()].name.startsWith('MV-') ? players[selected()].name.slice(3) : players[selected()].name }}<span>.</span></h1>
         <div id="soldier-details">

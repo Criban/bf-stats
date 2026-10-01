@@ -3,7 +3,7 @@
 * { box-sizing:border-box; } body { margin:0; } button { font-family:inherit; } a { color:inherit; text-decoration:none; }
 button:focus-visible,a:focus-visible { outline:2px solid var(--accent); outline-offset:5px; }
 ::selection { background:var(--accent); color:#101310; }
-.game-shell { min-height:100svh; display:flex; flex-direction:column; background:radial-gradient(ellipse at 75% 40%,#55584618,transparent 60%),#0c100e; }
+.game-shell { min-height:100svh; display:flex; flex-direction:column; background:radial-gradient(ellipse at 75% 40%,#b7a47c24,transparent 65%),#1b211e; }
 .topbar { min-height:88px; display:flex; align-items:center; padding:0 3%; gap:6%; background:#090c0ce8; border-bottom:1px solid var(--line); }
 .brand { font:700 32px/1 'Barlow Condensed',Impact,sans-serif; letter-spacing:-.5px; }
 .brand span { display:block; font:500 9px 'Barlow',sans-serif; letter-spacing:3px; color:var(--muted); margin-top:8px; }
@@ -30,14 +30,14 @@ h1 { font:700 clamp(42px,4.1vw,70px)/.95 'Barlow Condensed',Impact,sans-serif; m
 
 .soldier.selected { border-bottom-color:var(--accent); background:radial-gradient(ellipse at 50% 40%,#d5dcac14,transparent 75%),#d5dcac06; }
 .soldier.selected::after { content:''; position:absolute; inset:0; border:2px solid var(--accent); pointer-events:none; z-index:1; }
-/* Soften studio highlights and share the hangar's muted, warm ambient light.
+/* Match the portraits to warm afternoon daylight and bright hangar lighting.
    Apply grading to the complete portrait so animated layers and fallback images match. */
-.soldier { --portrait-brightness:.60; --portrait-selected-brightness:.63; --portrait-contrast:.90; --portrait-saturation:.68; --portrait-warmth:.14; }
-.soldier:nth-child(1) { --portrait-brightness:.63; --portrait-selected-brightness:.66; }
-.soldier:nth-child(2) { --portrait-brightness:.57; --portrait-selected-brightness:.60; --portrait-contrast:.88; }
-.soldier:nth-child(3) { --portrait-brightness:.61; --portrait-selected-brightness:.64; --portrait-saturation:.61; }
-.soldier.inactive { --portrait-brightness:.63; --portrait-saturation:.58; --portrait-warmth:.08; }
-.soldier .soldier-image { filter:sepia(var(--portrait-warmth)) saturate(var(--portrait-saturation)) contrast(var(--portrait-contrast)) brightness(var(--portrait-brightness)); }
+.soldier { --portrait-brightness:.96; --portrait-selected-brightness:.98; --portrait-contrast:.94; --portrait-saturation:.88; --portrait-warmth:.08; }
+.soldier:nth-child(1) { --portrait-brightness:.98; --portrait-selected-brightness:1; }
+.soldier:nth-child(2) { --portrait-brightness:.92; --portrait-selected-brightness:.94; --portrait-contrast:.92; }
+.soldier:nth-child(3) { --portrait-brightness:.96; --portrait-selected-brightness:.98; --portrait-saturation:.84; }
+.soldier.inactive { --portrait-brightness:.96; --portrait-saturation:.80; --portrait-warmth:.06; }
+.soldier .soldier-image { filter:sepia(var(--scene-warmth,var(--portrait-warmth))) saturate(var(--portrait-saturation)) contrast(var(--portrait-contrast)) brightness(calc(var(--portrait-brightness) * var(--scene-portrait-light,1))); transition:filter 3s ease; }
 .soldier.selected .soldier-image { --portrait-brightness:var(--portrait-selected-brightness); }
 .soldier.selected .soldier-label { background:var(--accent); color:#101310; }
 .soldier.selected .slot-number,.soldier.selected .selection-caption { color:#303725; }
@@ -63,12 +63,12 @@ footer { display:flex; justify-content:space-between; gap:20px; margin:0 3%; pad
 .soldier-scene { aspect-ratio:auto; isolation:isolate; }
 /* Register scenery and props to one image-sized plane, including on narrow screens. */
 .hangar-stage { position:absolute; inset:0; z-index:-1; container-type:size; pointer-events:none; }
-.hangar-world { position:absolute; left:50%; top:50%; width:max(100cqw,150cqh); aspect-ratio:3 / 2; transform:translate(-50%,-50%); background:url('../public/images/hangar-background-clear-lane.png') center / 100% 100% no-repeat; }
+.hangar-world { position:absolute; left:50%; top:50%; width:max(100cqw,150cqh); aspect-ratio:3 / 2; transform:translate(-50%,-50%); filter:brightness(var(--hall-brightness,1.18)) saturate(var(--hall-saturation,1.04)); transition:filter 3s ease; background:url('../public/images/hangar-background-clear-lane.png') center / 100% 100% no-repeat; }
 .hangar-foreground { position:absolute; inset:0; z-index:1; width:100%; height:100%; }
-.hangar-world::after { content:''; position:absolute; inset:0; z-index:2; background:radial-gradient(ellipse at 55% 40%,transparent 25%,#070c1050 100%),linear-gradient(#0b101460,#080d1180); }
+.hangar-world::after { content:''; position:absolute; inset:0; z-index:2; background:radial-gradient(ellipse at 78% 18%,rgb(255 229 181 / var(--scene-sunlight,.10)),transparent 65%),linear-gradient(rgb(37 53 82 / var(--scene-night-tint,0)),rgb(37 53 82 / var(--scene-night-tint,0))); }
 /* A ten-second crossing, followed by twenty seconds outside the scene. */
 .truck-lane { position:absolute; inset:0; pointer-events:none; transform:translateX(100%); animation:truck-crossing 30s linear 30s infinite; }
-.background-truck { position:absolute; left:0; bottom:37%; width:32%; aspect-ratio:1774 / 887; filter:brightness(.65) saturate(.75) blur(1.2px) drop-shadow(0 5px 3px #0005); }
+.background-truck { position:absolute; left:0; bottom:37%; width:32%; aspect-ratio:1774 / 887; filter:brightness(.88) saturate(.88) blur(1.2px) drop-shadow(0 5px 3px #0004); }
 .truck-body { position:relative; z-index:1; display:block; width:100%; height:100%; }
 .truck-ground-shadow { position:absolute; left:3%; top:87%; width:92%; height:12%; transform:skewX(-25deg); border-radius:50%; background:radial-gradient(ellipse,#0009 0%,#0006 35%,#0000 72%); filter:blur(3px); }
 .truck-wheel { position:absolute; top:62%; width:15.5%; height:auto; animation:truck-wheel-roll 30s linear 30s infinite; }
@@ -131,8 +131,8 @@ footer { display:flex; justify-content:space-between; gap:20px; margin:0 3%; pad
 /* Move the seated soldier and his ground shadow deeper into the hangar. */
 .soldier.inactive .soldier-portrait { transform:translateY(2%) scale(-.82,.82); transform-origin:50% 85%; }
 .soldier-ground-shadow { position:absolute; inset:0; z-index:-1; width:100%; height:100%; pointer-events:none; overflow:visible; }
-.cast-shadow { fill:#0007; filter:blur(18px); }
-.contact-shadow { fill:#0009; filter:blur(9px); }
+.cast-shadow { fill:#0005; filter:blur(22px); }
+.contact-shadow { fill:#0008; filter:blur(9px); }
 @media(min-width:761px) {
   .soldier-portrait { flex:1; height:0; min-height:0; aspect-ratio:auto; }
   .soldier-portrait .soldier-image { width:100%; height:100%; }

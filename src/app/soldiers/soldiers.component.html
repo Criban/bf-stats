@@ -1,6 +1,9 @@
 <section class="soldiers" aria-label="Soldaten auswählen">
   <div class="scene-top"><span>MV / EINSATZTEAM</span><span>{{ players().length }} MITGLIEDER</span></div>
-  <div class="soldier-scene" [class.history-open]="squadActive() && historyOpen()" [style.--selected-index]="selected()" [style.--soldier-count]="players().length">
+  <div class="soldier-scene" [class.history-open]="squadActive() && historyOpen()" [style.--selected-index]="selected()" [style.--soldier-count]="players().length"
+    [style.--hall-brightness]="lighting().hallBrightness" [style.--hall-saturation]="lighting().hallSaturation"
+    [style.--scene-portrait-light]="lighting().portraitLight" [style.--scene-warmth]="lighting().warmth"
+    [style.--scene-sunlight]="lighting().sunlight" [style.--scene-night-tint]="lighting().nightTint">
     <div class="hangar-stage" aria-hidden="true">
       <div class="hangar-world">
         <div class="truck-lane">
