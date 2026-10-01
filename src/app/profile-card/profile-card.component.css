@@ -9,14 +9,19 @@ h2 { font:600 clamp(28px,2.6vw,40px)/1.1 'Barlow Condensed',sans-serif; margin:1
 .main-stat > span { font-size:18px; font-weight:600; }
 small { display:block; margin-top:6px; color:var(--muted); font-size:9px; letter-spacing:1.5px; }
 .main-stat strong { font:600 72px/1 'Barlow Condensed',sans-serif; color:var(--accent); font-variant-numeric:tabular-nums; }
-.tracker-link { display:flex; justify-content:space-between; background:#e5e8e0; color:#151813; padding:15px; font-size:11px; font-weight:700; letter-spacing:.8px; }
-.tracker-link:hover { background:var(--accent); }
 .status-message { color:var(--muted); line-height:1.6; padding-top:25px; }
 .retry-button { padding:12px; border:1px solid var(--line); background:transparent; color:var(--text); cursor:pointer; }
 .extra-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:20px 0 24px; }
 .extra-stats dt { color:var(--muted); font-size:10px; letter-spacing:1px; }
 .extra-stats dd { margin:7px 0 0; height:36px; display:flex; align-items:center; font:600 30px/36px 'Barlow Condensed',sans-serif; font-variant-numeric:tabular-nums; }
 .partial-note { font-size:12px; color:var(--muted); }
+.weapon-stats { border-top:1px solid var(--line); padding-top:10px; min-height:110px; }
+.weapon-stats h3 { display:flex; justify-content:space-between; margin:0 0 8px; color:var(--muted); font-size:10px; font-weight:500; letter-spacing:1px; }
+.weapon-stats ol { list-style:none; margin:0; padding:0; }
+.weapon-stats li { display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding:4px 0; font-size:12px; }
+.weapon-name { min-width:0; overflow-wrap:anywhere; }
+.weapon-stats strong { flex-shrink:0; color:var(--accent); font-variant-numeric:tabular-nums; }
+.weapon-stats p { color:var(--muted); font-size:12px; margin:12px 0; }
 .stats-status { min-height:74px; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:5px; padding-bottom:12px; color:var(--muted); font-size:12px; }
 .stats-status .retry-button { padding:6px 10px; }
 .skeleton { display:block; width:70%; max-width:80px; height:26px; border-radius:2px; background:var(--line); animation:loading-pulse 1.6s ease-in-out infinite; }
@@ -24,3 +29,27 @@ small { display:block; margin-top:6px; color:var(--muted); font-size:9px; letter
 .sr-only { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
 @keyframes loading-pulse { 0%,100% { opacity:.4; } 50% { opacity:.85; } }
 @media(prefers-reduced-motion:reduce) { .skeleton { animation:none; opacity:.6; } }
+
+@media(min-width:761px) and (max-height:1000px) {
+  .player-panel { padding-top:12px; }
+  h2 { font-size:28px; margin:8px 0; }
+  .player-description { font-size:13px; margin-bottom:12px; }
+  .main-stat { height:76px; padding:12px 0; }
+  .main-stat strong { font-size:54px; }
+  .extra-stats { margin:12px 0; }
+  .extra-stats dd { margin-top:4px; font-size:26px; }
+  .stats-status { min-height:44px; padding-bottom:4px; }
+}
+
+@media(min-width:761px) and (max-height:800px) {
+  .player-description { margin-bottom:8px; }
+  .main-stat { height:60px; padding:6px 0; }
+  .main-stat strong { font-size:46px; }
+  .extra-stats { margin:8px 0; }
+  .weapon-stats { min-height:100px; padding-top:8px; }
+  .weapon-stats li { padding:3px 0; }
+}
+.private-profile { border-top:1px solid var(--line); padding:20px 0; } .private-profile h3 { color:var(--accent); font-size:12px; letter-spacing:1px; margin:0 0 12px; } .private-profile p { color:var(--muted); font-size:14px; line-height:1.6; margin:0; }
+.accuracy-stat { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:8px 0 12px; font-size:10px; letter-spacing:.7px; color:var(--muted); }
+.accuracy-stat strong { color:var(--accent); font-size:18px; font-variant-numeric:tabular-nums; }
+@media(min-width:761px) and (max-height:800px) { .accuracy-stat { margin:4px 0 8px; } }

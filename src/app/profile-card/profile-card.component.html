@@ -1,8 +1,14 @@
-﻿<article class="player-panel" [attr.aria-labelledby]="'player-' + player().id">
-  <div class="player-heading"><span>SQUAD-MITGLIED / {{ player().id }}</span><span class="member-badge">MV</span></div>
+<article class="player-panel" [attr.aria-labelledby]="'player-' + player().id">
+  <div class="player-heading"><span>SQUAD-MITGLIED @if (!player().privateProfile) { / {{ player().id }} }</span><span class="member-badge">MV</span></div>
   <h2 [id]="'player-' + player().id">{{ player().name }}</h2>
   <p class="player-description">{{ player().description }}</p>
   @let state = stats();
+  @if (player().privateProfile) {
+    <section class="private-profile" aria-label="Privates Profil">
+      <h3>PRIVATES PROFIL</h3>
+      <p>{{ player().name }} hat ein privates Profil. Statistiken sind deshalb nicht verfügbar.</p>
+    </section>
+  } @else {
   <div class="stats-panel" [attr.aria-busy]="state.status === 'loading'">
     <div class="main-stat">
       <span>K/D <small>KILLS / TODE</small></span>
@@ -14,6 +20,21 @@
       <div><dt>STUNDEN</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.hours : '—' }} }</dd></div>
       <div><dt>MATCHES</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.matches : '—' }} }</dd></div>
     </dl>
+    <div class="accuracy-stat"><span>TREFFGENAUIGKEIT</span>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { <strong>{{ state.status === 'ready' ? state.accuracy : '—' }}</strong> }</div>
+    <section class="weapon-stats" aria-label="Waffen mit den meisten Kills">
+      <h3>TOP WAFFEN <span>KILLS</span></h3>
+      @if (state.status === 'loading') {
+        <span class="skeleton" aria-hidden="true"></span>
+      } @else if (state.status === 'ready' && state.weapons.length) {
+        <ol>
+          @for (weapon of state.weapons; track $index) {
+            <li><span class="weapon-name">{{ weapon.weaponName }}</span><strong>{{ weapon.kills }}</strong></li>
+          }
+        </ol>
+      } @else {
+        <p>Keine Waffendaten verfügbar.</p>
+      }
+    </section>
   </div>
   <div class="stats-status" role="status" aria-live="polite">
     @switch (state.status) {
@@ -22,5 +43,5 @@
       @case ('ready') { @if (state.rank === '—') { <span>Rang nicht verfügbar.</span><button type="button" class="retry-button" (click)="retryStats()">Erneut laden ↻</button> } @else { <span class="sr-only">Statistiken für {{ player().name }} geladen.</span> } }
     }
   </div>
-  <a class="tracker-link" [href]="player().trackerUrl" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'BF6-Profil von ' + player().name + ' auf Tracker.gg (neuer Tab)'">PROFIL AUF TRACKER.GG <span aria-hidden="true">↗</span></a>
+  }
 </article>

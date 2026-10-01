@@ -1,7 +1,9 @@
 ﻿import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { catchError, forkJoin, map, Observable, of, timeout } from 'rxjs';
-export interface Bf6Stats { killDeath: number; rank: number | null; hoursPlayed: number | null; matchesPlayed: number | null; }
+import { topWeapons, type WeaponStats } from './weapon-stats';
+import { parseAccuracy } from './accuracy';
+export interface Bf6Stats { killDeath: number; accuracy: number | null; rank: number | null; hoursPlayed: number | null; matchesPlayed: number | null; weapons: WeaponStats[]; }
 @Injectable({ providedIn: 'root' })
 export class Bf6StatsService {
   private readonly http = inject(HttpClient);
@@ -17,7 +19,7 @@ export class Bf6StatsService {
       const killDeath = number(response?.['infantryKillDeath']);
       if (killDeath === null) throw new Error('Keine gültige K/D erhalten.');
       const seconds = number(response['secondsPlayed']);
-      return { killDeath, rank: number(profile?.playerProfiles?.[0]?.playerCard?.rank), hoursPlayed: seconds === null ? null : seconds / 3600, matchesPlayed: number(response['matchesPlayed']) };
+      return { killDeath, accuracy: parseAccuracy(response['accuracy']), rank: number(profile?.playerProfiles?.[0]?.playerCard?.rank), hoursPlayed: seconds === null ? null : seconds / 3600, matchesPlayed: number(response['matchesPlayed']), weapons: topWeapons(response['weapons']) };
     }));
   }
 }
