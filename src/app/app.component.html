@@ -35,7 +35,7 @@
         <div class="soldier-buttons" [style.--soldier-count]="players.length">
           @for (player of players; track $index) {
             <button class="soldier" type="button" [disabled]="!!player.inactive" [class.inactive]="player.inactive" [attr.inert]="historyOpen() && view() === 'squad' && selected() !== $index ? '' : null" [class.selected]="view() === 'squad' && selected() === $index" [attr.aria-pressed]="view() === 'squad' && selected() === $index" [attr.aria-label]="player.name + (player.inactive ? ': Inaktiv' : player.privateProfile ? ': Privates Profil anzeigen' : ': Statistiken anzeigen')" (click)="selectSoldier($index)">
-              <span class="soldier-portrait"><img class="soldier-image" [src]="player.image" [alt]="player.imageAlt" width="1024" height="1536"></span>
+              <span class="soldier-portrait"><app-soldier-portrait [src]="player.image" [description]="player.imageAlt" [index]="$index" [inactive]="!!player.inactive" /></span>
               @if (!player.inactive && (view() !== 'squad' || selected() !== $index)) { <span class="selection-marker" aria-hidden="true">+</span> }
               <span class="soldier-label"><span class="slot-number">0{{ $index + 1 }} / MV</span><strong>{{ player.name }}</strong><span class="selection-caption">{{ player.inactive ? 'INAKTIV' : view() === 'squad' && selected() === $index ? 'AUSGEWÄHLT' : 'AUSWÄHLEN' }}</span></span>
             </button>

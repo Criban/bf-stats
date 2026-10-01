@@ -5,7 +5,8 @@ import { ProfileCardComponent, type PlayerProfile } from './app/profile-card/pro
 import { BattlefieldHistoryComponent } from './app/battlefield-history/battlefield-history.component';
 import type { Bf6Stats } from './app/services/bf6-stats.service';
 import { VideosComponent } from './app/videos/videos.component';
-@Component({ selector: 'app-root', standalone: true, imports: [ProfileCardComponent, BattlefieldHistoryComponent, VideosComponent], templateUrl: './app/app.component.html' })
+import { SoldierPortraitComponent } from './app/soldier-portrait.component';
+@Component({ selector: 'app-root', standalone: true, imports: [ProfileCardComponent, BattlefieldHistoryComponent, VideosComponent, SoldierPortraitComponent], templateUrl: './app/app.component.html' })
 export class AppComponent {
   readonly view = signal<'squad' | 'clan' | 'videos'>('clan');
   readonly selected = signal(0);
