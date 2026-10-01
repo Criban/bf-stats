@@ -3,8 +3,16 @@
 .head { transform-origin:50% 17%; animation:head-breath 4.8s ease-in-out infinite; }
 .arm-left { transform-origin:36% 18%; animation:left-arm-breath 4.8s ease-in-out infinite; }
 .arm-right { transform-origin:64% 18%; animation:right-arm-breath 4.8s ease-in-out infinite; }
-.blackhawk-rig .ribcage,.blackhawk-rig .head { animation-duration:5.2s; animation-delay:-1.3s; }
+.blackhawk-rig g { animation-duration:5.7s; animation-delay:-2.1s; }
+.criban-rig g { animation-duration:4.6s; animation-delay:-.4s; }
 .arms-weapon { transform-origin:44% 20%; animation:aiming-breath 5.2s ease-in-out -1.3s infinite; }
+/* Static portraits breathe gently around their ground contact point. */
+img.soldier-image { transform-origin:50% 95%; animation:portrait-breath 7.3s ease-in-out -4.8s infinite; }
+img.kingcoffee-portrait { animation-duration:6.2s; animation-delay:-3.3s; }
+@keyframes portrait-breath {
+  0%,100% { transform:scale(1); }
+  44% { transform:scale(1.003,1.007); }
+}
 @keyframes chest-breath {
   0%,100% { transform:translateY(0) scale(1); }
   45% { transform:translateY(-4px) scale(1.018,1.025); }
@@ -25,4 +33,4 @@
   0%,100% { transform:translateY(0) rotate(0); }
   45% { transform:translateY(-7px) rotate(-.25deg); }
 }
-@media(prefers-reduced-motion:reduce) { .criban-rig g,.blackhawk-rig g { animation:none; } }
+@media(prefers-reduced-motion:reduce) { .criban-rig g,.blackhawk-rig g,img.soldier-image { animation:none; } }
