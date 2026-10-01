@@ -1,0 +1,17 @@
+<section class="soldiers" aria-label="Soldaten auswählen">
+  <div class="scene-top"><span>MV / EINSATZTEAM</span><span>{{ players().length }} MITGLIEDER</span></div>
+  <div class="soldier-scene" [class.history-open]="squadActive() && historyOpen()" [style.--selected-index]="selected()" [style.--soldier-count]="players().length">
+
+    <div class="soldier-buttons" [style.--soldier-count]="players().length">
+      @for (player of players(); track $index) {
+        <button class="soldier" type="button" [disabled]="!!player.inactive" [class.inactive]="player.inactive" [attr.inert]="historyOpen() && squadActive() && selected() !== $index ? '' : null" [class.selected]="squadActive() && selected() === $index" [attr.aria-pressed]="squadActive() && selected() === $index" [attr.aria-label]="player.name + (player.inactive ? ': Inaktiv' : player.privateProfile ? ': Privates Profil anzeigen' : ': Statistiken anzeigen')" (click)="soldierSelected.emit($index)">
+          <span class="soldier-portrait"><app-soldier-portrait [src]="player.image" [description]="player.imageAlt" [index]="$index" [inactive]="!!player.inactive" /></span>
+          @if (!player.inactive && (!squadActive() || selected() !== $index)) { <span class="selection-marker" aria-hidden="true">+</span> }
+          <span class="soldier-label"><span class="slot-number">0{{ $index + 1 }} / MV</span><strong>{{ player.name }}</strong><span class="selection-caption">{{ player.inactive ? 'INAKTIV' : squadActive() && selected() === $index ? 'AUSGEWÄHLT' : 'AUSWÄHLEN' }}</span></span>
+        </button>
+      }
+    </div>
+    <app-battlefield-history [player]="players()[selected()]" [stats]="stats()" [(open)]="historyOpen" />
+  </div>
+  <div class="scene-bottom"><span>↵ SOLDAT AUSWÄHLEN</span></div>
+</section>

@@ -31,7 +31,9 @@ h1 { font:700 clamp(42px,4.1vw,70px)/.95 'Barlow Condensed',Impact,sans-serif; m
 .soldier.selected { border-bottom-color:var(--accent); background:radial-gradient(ellipse at 50% 40%,#d5dcac38,transparent 75%),#d5dcac12; }
 .soldier.selected::after { content:''; position:absolute; inset:0; border:2px solid var(--accent); pointer-events:none; z-index:1; }
 .soldier.selected .soldier-image { filter:brightness(1.12) drop-shadow(0 0 18px #d5dcac45); }
-/* Match the generated Criban layers to the dim light in the hangar. */
+/* Match the generated layers to the dim light in the hangar. */
+.soldier .blackhawk-rig { filter:brightness(.82) contrast(1.04) saturate(.90); }
+.soldier.selected .blackhawk-rig { filter:brightness(.87) contrast(1.04) saturate(.90) drop-shadow(0 0 18px #d5dcac45); }
 .soldier .criban-rig { filter:brightness(.76) contrast(1.06) saturate(.88); }
 .soldier.selected .criban-rig { filter:brightness(.81) contrast(1.06) saturate(.88) drop-shadow(0 0 18px #d5dcac45); }
 .soldier .kingcoffee-portrait { filter:brightness(.84) contrast(1.04) saturate(.90); }

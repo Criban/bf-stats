@@ -28,23 +28,14 @@
       }
       <p class="data-note">STATISTIKEN VIA GAMETOOLS<br>BF6 · EA · MULTIPLAYER</p>
     </section>
-    <section class="soldiers" aria-label="Soldaten auswählen">
-      <div class="scene-top"><span>MV / EINSATZTEAM</span><span>{{ players.length }} MITGLIEDER</span></div>
-      <div class="soldier-scene" [class.history-open]="view() === 'squad' && historyOpen()" [style.--selected-index]="selected()" [style.--soldier-count]="players.length">
-        
-        <div class="soldier-buttons" [style.--soldier-count]="players.length">
-          @for (player of players; track $index) {
-            <button class="soldier" type="button" [disabled]="!!player.inactive" [class.inactive]="player.inactive" [attr.inert]="historyOpen() && view() === 'squad' && selected() !== $index ? '' : null" [class.selected]="view() === 'squad' && selected() === $index" [attr.aria-pressed]="view() === 'squad' && selected() === $index" [attr.aria-label]="player.name + (player.inactive ? ': Inaktiv' : player.privateProfile ? ': Privates Profil anzeigen' : ': Statistiken anzeigen')" (click)="selectSoldier($index)">
-              <span class="soldier-portrait"><app-soldier-portrait [src]="player.image" [description]="player.imageAlt" [index]="$index" [inactive]="!!player.inactive" /></span>
-              @if (!player.inactive && (view() !== 'squad' || selected() !== $index)) { <span class="selection-marker" aria-hidden="true">+</span> }
-              <span class="soldier-label"><span class="slot-number">0{{ $index + 1 }} / MV</span><strong>{{ player.name }}</strong><span class="selection-caption">{{ player.inactive ? 'INAKTIV' : view() === 'squad' && selected() === $index ? 'AUSGEWÄHLT' : 'AUSWÄHLEN' }}</span></span>
-            </button>
-          }
-        </div>
-        <app-battlefield-history [player]="players[selected()]" [stats]="selectedStats()" [(open)]="historyOpen" />
-      </div>
-      <div class="scene-bottom"><span>↵ SOLDAT AUSWÄHLEN</span></div>
-    </section>
+    <app-soldiers
+      [players]="players"
+      [selected]="selected()"
+      [squadActive]="view() === 'squad'"
+      [stats]="selectedStats()"
+      [(historyOpen)]="historyOpen"
+      (soldierSelected)="selectSoldier($event)"
+    />
     }
   </main>
 

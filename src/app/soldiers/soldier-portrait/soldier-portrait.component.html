@@ -1,0 +1,34 @@
+@if (index() === 0 && !failed()) {
+  <svg class="soldier-image blackhawk-rig" viewBox="0 0 1024 1536" width="1024" height="1536"
+    role="img" [attr.aria-label]="description()" xmlns="http://www.w3.org/2000/svg">
+    <image href="images/blackhawk-rig/legs.png" x="90" y="395" width="798.72" height="1198.08" (error)="failed.set(true)" />
+    <g class="ribcage">
+      <image href="images/blackhawk-rig/torso.png" x="200" y="95" width="634.88" height="952.32" (error)="failed.set(true)" />
+    </g>
+    <g class="head">
+      <image href="images/blackhawk-rig/head.png" x="215" y="15" width="512" height="768" (error)="failed.set(true)" />
+    </g>
+    <g class="arms-weapon">
+      <image href="images/blackhawk-rig/arms-weapon.png" x="185" y="-30" width="839.68" height="1259.52" (error)="failed.set(true)" />
+    </g>
+  </svg>
+} @else if (index() === 1 && !failed()) {
+  <svg class="soldier-image criban-rig" viewBox="0 0 1024 1536" width="1024" height="1536"
+    role="img" [attr.aria-label]="description()" xmlns="http://www.w3.org/2000/svg">
+    <image href="images/criban-rig/legs.png" x="102" y="425" width="778.24" height="1167.36" (error)="failed.set(true)" />
+    <g class="arm-left">
+      <image href="images/criban-rig/arm-left.png" x="45" y="55" width="819.2" height="1228.8" (error)="failed.set(true)" />
+    </g>
+    <g class="arm-right">
+      <image href="images/criban-rig/arm-right.png" x="117" y="16" width="839.68" height="1259.52" (error)="failed.set(true)" />
+    </g>
+    <g class="ribcage">
+      <image href="images/criban-rig/torso.png" x="180" y="105" width="614.4" height="921.6" (error)="failed.set(true)" />
+    </g>
+    <g class="head">
+      <image href="images/criban-rig/head.png" x="245" y="0" width="512" height="768" (error)="failed.set(true)" />
+    </g>
+  </svg>
+} @else {
+  <img class="soldier-image" [class.kingcoffee-portrait]="index() === 2" [src]="src()" [alt]="description()" width="1024" height="1536">
+}

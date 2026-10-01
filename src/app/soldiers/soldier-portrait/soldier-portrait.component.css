@@ -1,0 +1,28 @@
+.criban-rig g,.blackhawk-rig g { transform-box:view-box; }
+.ribcage { transform-origin:51% 41%; animation:chest-breath 4.8s ease-in-out infinite; }
+.head { transform-origin:50% 17%; animation:head-breath 4.8s ease-in-out infinite; }
+.arm-left { transform-origin:36% 18%; animation:left-arm-breath 4.8s ease-in-out infinite; }
+.arm-right { transform-origin:64% 18%; animation:right-arm-breath 4.8s ease-in-out infinite; }
+.blackhawk-rig .ribcage,.blackhawk-rig .head { animation-duration:5.2s; animation-delay:-1.3s; }
+.arms-weapon { transform-origin:44% 20%; animation:aiming-breath 5.2s ease-in-out -1.3s infinite; }
+@keyframes chest-breath {
+  0%,100% { transform:translateY(0) scale(1); }
+  45% { transform:translateY(-4px) scale(1.018,1.025); }
+}
+@keyframes head-breath {
+  0%,100% { transform:translateY(0) rotate(0); }
+  45% { transform:translateY(-9px) rotate(.15deg); }
+}
+@keyframes left-arm-breath {
+  0%,100% { transform:translateY(0) rotate(0); }
+  48% { transform:translateY(-6px) rotate(.8deg); }
+}
+@keyframes right-arm-breath {
+  0%,100% { transform:translateY(0) rotate(0); }
+  48% { transform:translateY(-6px) rotate(-.8deg); }
+}
+@keyframes aiming-breath {
+  0%,100% { transform:translateY(0) rotate(0); }
+  45% { transform:translateY(-7px) rotate(-.25deg); }
+}
+@media(prefers-reduced-motion:reduce) { .criban-rig g,.blackhawk-rig g { animation:none; } }
