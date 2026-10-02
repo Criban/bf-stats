@@ -12,15 +12,20 @@
     <div class="main-stat">
       <span>K/D <small>KILLS / TODE</small></span>
       @if (state.status === 'loading') { <span class="skeleton skeleton-kd" aria-hidden="true"></span> }
-      @else { <strong>{{ state.status === 'ready' ? state.killDeath : '—' }}</strong> }
+      @else {
+        <div class="main-stat-value"><strong>{{ state.status === 'ready' ? state.killDeath : '—' }}</strong>
+          @if (state.status === 'ready' && state.changes.killDeath; as change) { <span [class]="'stat-change ' + change.direction">({{ change.text }})</span> }
+        </div>
+      }
     </div>
     <dl class="extra-stats">
       <div><dt>RANG</dt><dd class="rank-value">@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.rank : '—' }} @if (state.status === 'ready' && state.rankName) { <span class="rank-name">{{ state.rankName }}</span> } }</dd></div>
-      <div><dt>STUNDEN</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.hours : '—' }} }</dd></div>
-      <div><dt>MATCHES</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.matches : '—' }} }</dd></div>
-      <div><dt>TREFFGENAUIGKEIT</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.accuracy : '—' }} }</dd></div>
-      <div><dt>ABGEFEUERTE SCHÜSSE</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.shots : '—' }} }</dd></div>
+      <div><dt>STUNDEN</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.hours : '—' }} @if (state.status === 'ready' && state.changes.hoursPlayed; as change) { <span [class]="'stat-change ' + change.direction">({{ change.text }})</span> } }</dd></div>
+      <div><dt>MATCHES</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.matches : '—' }} @if (state.status === 'ready' && state.changes.matchesPlayed; as change) { <span [class]="'stat-change ' + change.direction">({{ change.text }})</span> } }</dd></div>
+      <div><dt>TREFFGENAUIGKEIT</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.accuracy : '—' }} @if (state.status === 'ready' && state.changes.accuracy; as change) { <span [class]="'stat-change ' + change.direction">({{ change.text }})</span> } }</dd></div>
+      <div><dt>ABGEFEUERTE SCHÜSSE</dt><dd>@if (state.status === 'loading') { <span class="skeleton" aria-hidden="true"></span> } @else { {{ state.status === 'ready' ? state.shots : '—' }} @if (state.status === 'ready' && state.changes.shotsFired; as change) { <span [class]="'stat-change ' + change.direction">({{ change.text }})</span> } }</dd></div>
     </dl>
+    @if (state.status === 'ready' && state.comparisonNote) { <p class="comparison-note">{{ state.comparisonNote }}</p> }
     <section class="weapon-stats" aria-label="Waffen mit den meisten Kills">
       <h3>TOP WAFFEN <span>KILLS</span></h3>
       @if (state.status === 'loading') {

@@ -29,6 +29,8 @@ Nach Änderungen an `angular.json` den Entwicklungsserver neu starten (`Strg+C`,
 
 ## BF6-Statistik-Abzug
 
+Die BF6-Karte speichert K/D, Stunden, Matches, Treffgenauigkeit und abgefeuerte Schüsse pro Spieler im Local Storage dieses Browsers. Der erste erfolgreiche API-Abruf pro Kalendertag (Europe/Berlin) speichert einen neuen Stand; der vorherige Stand bleibt als Vergleich erhalten. Weitere Besuche am selben Tag überschreiben nichts. Zuwächse erscheinen grün, Rückgänge rot und unveränderte Werte grau neben den aktuellen Zahlen. Der Hinweis nennt Datum und Uhrzeit des Vergleichs; Treffgenauigkeit wird in Prozentpunkten verglichen. Beim ersten Besuch wird zunächst ein Ausgangsstand angelegt. API-Ersatzdaten aus der Abzugsdatei werden nicht in diesen Verlauf übernommen. Der Verlaufstest läuft mit `node scripts/check-bf6-history.mjs`.
+
 Erfolgreich geladene API-Statistiken werden pro Spieler für fünf Minuten im Arbeitsspeicher gecached. Beim Spielerwechsel werden sie wiederverwendet; parallele Abfragen für denselben Spieler teilen einen Request. Nach einem Neuladen der Seite beginnt der Cache neu. „Erneut laden“ leert den Cache des ausgewählten Spielers. Fehler und lokale Statistik-Abzüge werden nicht gecached.
 
 Die BF6-Ansicht zeigt auch die abgefeuerten Schüsse (`shotsFired`). Die Historie summiert Spielzeit, Schüsse und Matches aus den numerischen `totals` der Einträge in `src/app/data/battlefield-history.ts` und den aktuellen BF6-Werten (bei API-Problemen aus dem lokalen Abzug). BF6 wird einmal gezählt. Fehlende Werte werden nicht als null Schüsse oder null Matches interpretiert, sondern als unvollständige Summe gekennzeichnet. Bei neuen historischen Einträgen die numerischen `totals` zusammen mit den angezeigten `stats` pflegen.
