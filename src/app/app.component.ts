@@ -1,7 +1,10 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { catchError, EMPTY } from 'rxjs';
 import { ProfileCardComponent, type PlayerProfile } from './profile-card/profile-card.component';
 import { SoldiersComponent } from './soldiers/soldiers.component';
-import type { Bf6Stats } from './services/bf6-stats.service';
+import { Bf6StatsService, type Bf6Stats } from './services/bf6-stats.service';
+import { compareDailyStats } from './services/bf6-stats-history';
 import { VideosComponent } from './videos/videos.component';
 
 @Component({
@@ -26,6 +29,19 @@ export class AppComponent {
     { id: 'mv-kingcoffee', image: 'images/kingcoffee-support-transparent.png', imageAlt: 'Versorger von vorne mit Helm, Sonnenbrille und locker auf Hüfthöhe gehaltenem Gewehr', name: 'MV-KingCoffee', description: 'Versorger – hält das Squad am Laufen.', privateProfile: true },
     { id: 'mv-54bi44', image: 'images/54bi44-camping-chair.png', imageAlt: 'Soldat mit Kapuze und Schutzbrille sitzt entspannt auf einem Campingstuhl', name: 'MV-54bI44', description: 'Kurze Einsatzpause – das Squad hält deinen Platz frei.', privateProfile: true, inactive: true },
   ];
+  private readonly statsService = inject(Bf6StatsService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  ngOnInit(): void {
+    for (const player of this.players.filter(player => !player.privateProfile)) {
+      this.statsService.getStats(player.name).pipe(
+        catchError(() => EMPTY), takeUntilDestroyed(this.destroyRef)
+      ).subscribe(stats => {
+        compareDailyStats(player.name, stats);
+        this.recordStats({ playerId: player.id, stats });
+      });
+    }
+  }
   toggleHistory(): void { this.historyOpen.update(open => !open); }
   closeHistory(): void { this.historyOpen.set(false); }
   selectSoldier(index: number): void {

@@ -56,7 +56,7 @@ export class ProfileCardComponent {
     })) as Record<HistoryMetric, StatChange | null>;
     const date = comparison ? new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Berlin' }).format(new Date(comparison.baseline?.savedAt ?? comparison.savedAt)) : null;
     return { changes, comparisonNote: comparison?.baseline
-      ? `Änderung zum gespeicherten BF6-Stand vom ${date} Uhr (Berlin). Speicherung einmal täglich in diesem Browser. PP = Prozentpunkte.`
+      ? `Änderung zum gespeicherten BF6-Stand vom ${date} Uhr (Berlin). Ein Stand pro Tag in diesem Browser; heutige Werte werden bei jedem Abruf aktualisiert. PP = Prozentpunkte.`
       : null };
   }
 
