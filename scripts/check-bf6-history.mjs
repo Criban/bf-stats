@@ -14,7 +14,7 @@ const visit = (stats, date, name = 'Player A') => compareDailyStats(name, stats,
 
 assert.equal(visit(initial, '2026-10-02T10:00:00Z').baseline, null);
 assert.equal(writes, 1);
-assert.deepEqual(visit(update, '2026-10-02T11:00:00Z').baseline.values, initial);
+assert.equal(visit(update, '2026-10-02T11:00:00Z').baseline, null, 'The first daily snapshot alone must not show a comparison');
 assert.equal(writes, 1, 'Reloads must not overwrite the daily snapshot');
 const nextDay = visit(update, '2026-10-02T22:00:00Z'); // Midnight in Berlin.
 assert.deepEqual(nextDay.baseline.values, initial);

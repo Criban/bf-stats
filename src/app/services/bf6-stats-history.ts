@@ -37,7 +37,7 @@ export function compareDailyStats(name: string, stats: Bf6Stats, now = new Date(
       } catch { /* Replace an unreadable entry with a fresh starting point. */ }
     }
     if (history && calendarDay(new Date(history.latest.savedAt)) === calendarDay(now)) {
-      return { baseline: history.previous ?? history.latest, savedAt: history.latest.savedAt };
+      return { baseline: history.previous, savedAt: history.latest.savedAt };
     }
     const latest: StatsSnapshot = {
       savedAt: now.toISOString(),

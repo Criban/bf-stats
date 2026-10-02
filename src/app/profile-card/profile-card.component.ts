@@ -55,9 +55,9 @@ export class ProfileCardComponent {
       return [key, { text, direction: difference > 0 ? 'positive' : difference < 0 ? 'negative' : 'neutral' }];
     })) as Record<HistoryMetric, StatChange | null>;
     const date = comparison ? new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Berlin' }).format(new Date(comparison.baseline?.savedAt ?? comparison.savedAt)) : null;
-    return { changes, comparisonNote: comparison ? comparison.baseline
+    return { changes, comparisonNote: comparison?.baseline
       ? `Änderung zum gespeicherten BF6-Stand vom ${date} Uhr (Berlin). Speicherung einmal täglich in diesem Browser. PP = Prozentpunkte.`
-      : `Erster BF6-Vergleichsstand am ${date} Uhr (Berlin) gespeichert. Speicherung einmal täglich in diesem Browser.` : null };
+      : null };
   }
 
   private formatValue(value: number | null, digits = 0): string {
