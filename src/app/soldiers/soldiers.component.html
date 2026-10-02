@@ -20,7 +20,7 @@
 
     <div class="soldier-buttons" [style.--soldier-count]="players().length">
       @for (player of players(); track $index) {
-        <button class="soldier" type="button" [disabled]="!!player.inactive" [class.inactive]="player.inactive" [attr.inert]="historyOpen() && squadActive() && selected() !== $index ? '' : null" [class.selected]="squadActive() && selected() === $index" [attr.aria-pressed]="squadActive() && selected() === $index" [attr.aria-label]="player.name + (player.inactive ? ': Inaktiv' : player.privateProfile ? ': Privates Profil anzeigen' : ': Statistiken anzeigen')" (click)="soldierSelected.emit($index)">
+        <button class="soldier" type="button" [disabled]="!!player.inactive" [class.inactive]="player.inactive" [class.seated]="player.id === 'mv-54bi44'" [attr.inert]="historyOpen() && squadActive() && selected() !== $index ? '' : null" [class.selected]="squadActive() && selected() === $index" [attr.aria-pressed]="squadActive() && selected() === $index" [attr.aria-label]="player.name + (player.inactive ? ': Inaktiv' : player.privateProfile ? ': Privates Profil anzeigen' : ': Statistiken anzeigen')" (click)="soldierSelected.emit($index)">
           <span class="soldier-portrait">
             <svg class="soldier-ground-shadow" viewBox="0 0 1024 1536" aria-hidden="true" focusable="false">
               <ellipse class="cast-shadow" cx="430" cy="1460" rx="335" ry="58" transform="rotate(-7 430 1460)" />
