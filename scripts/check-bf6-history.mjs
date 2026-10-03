@@ -27,8 +27,14 @@ assert.equal(visit(initial, '2026-10-09T10:00:00Z', 'Player B').baseline, null);
 assert.equal(entries.size, 2, 'Each player needs an independent history');
 
 const beforeFallback = entries.get('bf6-stats-history:v2:Player%20A');
-assert.deepEqual(visit({ ...initial, capturedAt: '2026-10-01T10:00:00Z' }, '2026-10-10T10:00:00Z').baseline.values, initial);
+assert.equal(visit({ ...initial, capturedAt: '2026-10-01T10:00:00Z' }, '2026-10-10T10:00:00Z'), null, 'Fallback data never produce a historical comparison');
 assert.equal(entries.get('bf6-stats-history:v2:Player%20A'), beforeFallback, 'Fallback data never create a live entry');
+const beforeSameDayFallback = entries.get('bf6-stats-history:v2:Player%20A');
+assert.equal(visit({ ...initial, matchesPlayed: 536, capturedAt: '2026-10-01T10:00:00Z' }, '2026-10-09T11:00:00Z'), null, 'An older fallback cannot show negative matches after a successful live reading');
+assert.equal(entries.get('bf6-stats-history:v2:Player%20A'), beforeSameDayFallback, 'Fallback data never overwrite the current daily entry');
+assert.deepEqual(visit(update, '2026-10-10T11:00:00Z').baseline.values, initial, 'Live comparisons resume against the preserved history after an outage');
+assert.equal(visit({ ...initial, capturedAt: '2026-10-01T10:00:00Z' }, '2026-10-10T10:00:00Z', 'Fallback Only'), null);
+assert.equal(entries.has('bf6-stats-history:v2:Fallback%20Only'), false, 'Fallback-only visits do not create a history');
 assert.equal(compareDailyStats('A', initial, new Date(), { getItem() { throw new Error('Blocked'); }, setItem() {} }), null);
 assert.equal(compareDailyStats('A', initial, new Date(), { getItem() { return null; }, setItem() { throw new Error('Quota'); } }), null);
 for (const corrupt of ['broken JSON', '{}', '{"snapshots":null}', JSON.stringify({ version: 2, snapshots: [{ savedAt: 'invalid', values: initial }] })]) {
@@ -61,6 +67,6 @@ assert.deepEqual(visit(initial, '2026-10-02T10:00:00Z', 'MV-Criban').baseline, r
 assert.equal(history('MV-Criban').length, 2);
 assert.ok(history('MV-Criban').every(snapshot => snapshot.source !== 'demo'));
 entries.set(cribanKey, JSON.stringify({ version: 2, snapshots: [oldDemo] }));
-assert.equal(visit({ ...initial, capturedAt: '2026-10-01T15:00:00Z' }, '2026-10-02T10:00:00Z', 'MV-Criban').baseline, null);
+assert.equal(visit({ ...initial, capturedAt: '2026-10-01T15:00:00Z' }, '2026-10-02T10:00:00Z', 'MV-Criban'), null);
 assert.deepEqual(history('MV-Criban'), [], 'Demo-only histories are cleared even during API outages');
 console.log('PASS daily updates, complete history, previous-day comparison, migration, demo cleanup, Berlin midnight/DST, player isolation, fallback and storage errors');

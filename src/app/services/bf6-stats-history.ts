@@ -43,7 +43,7 @@ export function compareDailyStats(name: string, stats: Bf6Stats, now = new Date(
     for (const snapshot of snapshots.sort((a, b) => Date.parse(a.savedAt) - Date.parse(b.savedAt))) {
       if (Date.parse(snapshot.savedAt) <= now.getTime()) daily.set(calendarDay(new Date(snapshot.savedAt)), snapshot);
     }
-    // An API fallback may be compared, but must never be saved as today's live reading.
+    // An API fallback must never be saved as today's live reading.
     if (!stats.capturedAt) daily.set(today, {
       savedAt: now.toISOString(), values: Object.fromEntries(HISTORY_METRICS.map(key => [key, stats[key]])) as Values
     });
@@ -51,6 +51,9 @@ export function compareDailyStats(name: string, stats: Bf6Stats, now = new Date(
     const baseline = snapshots.filter(snapshot => calendarDay(new Date(snapshot.savedAt)) < today).at(-1) ?? null;
     const serialized = JSON.stringify({ version: 2, snapshots } satisfies History);
     if (serialized !== raw && (snapshots.length || raw)) target.setItem(key, serialized);
+    // The bundled fallback can be older than the baseline. Comparing it would
+    // incorrectly report lost matches, hours or shots during an API outage.
+    if (stats.capturedAt) return null;
     return { baseline, savedAt: daily.get(today)?.savedAt ?? stats.capturedAt ?? now.toISOString() };
   } catch {
     // Disabled storage or a full quota must not prevent displaying live statistics.
