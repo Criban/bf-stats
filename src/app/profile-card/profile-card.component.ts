@@ -4,7 +4,7 @@ import { catchError, combineLatest, distinctUntilChanged, map, of, startWith, Su
 import { Bf6StatsService, type Bf6Stats } from '../services/bf6-stats.service';
 import { compareDailyStats, HISTORY_METRICS, type HistoryMetric } from '../services/bf6-stats-history';
 
-type StatChange = { text: string; direction: 'positive' | 'negative' | 'neutral' };
+type StatChange = { text: string; direction: 'positive' | 'negative' };
 type StatsState = { status: 'private' } | { status: 'loading' } | { status: 'error' } | { status: 'ready'; killDeath: string; accuracy: string; rank: string; rankName: string | null; hours: string; matches: string; shots: string; capturedAt?: string; changes: Record<HistoryMetric, StatChange | null>; comparisonNote: string | null; weapons: { weaponName: string; kills: string }[] };
 
 export interface PlayerProfile {
@@ -51,11 +51,12 @@ export class ProfileCardComponent {
       const digits = key === 'killDeath' ? 2 : key === 'accuracy' || key === 'hoursPlayed' ? 1 : 0;
       // Round at the displayed precision so tiny fluctuations do not show as +0.
       const difference = Number((current - previous).toFixed(digits));
+      if (difference === 0) return [key, null];
       const text = `${difference > 0 ? '+' : difference < 0 ? '−' : ''}${this.formatValue(Math.abs(difference), digits)}${key === 'accuracy' ? ' PP' : ''}`;
-      return [key, { text, direction: difference > 0 ? 'positive' : difference < 0 ? 'negative' : 'neutral' }];
+      return [key, { text, direction: difference > 0 ? 'positive' : 'negative' }];
     })) as Record<HistoryMetric, StatChange | null>;
     const date = comparison ? new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Berlin' }).format(new Date(comparison.baseline?.savedAt ?? comparison.savedAt)) : null;
-    return { changes, comparisonNote: comparison?.baseline
+    return { changes, comparisonNote: comparison?.baseline && Object.values(changes).some(change => change !== null)
       ? `Änderung zum gespeicherten BF6-Stand vom ${date} Uhr (Berlin). Ein Stand pro Tag in diesem Browser; heutige Werte werden bei jedem Abruf aktualisiert. PP = Prozentpunkte.`
       : null };
   }
