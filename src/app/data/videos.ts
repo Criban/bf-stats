@@ -15,4 +15,6 @@ export const SQUAD_VIDEOS: readonly SquadVideo[] = [
   { id: 'yxQZAnmMPWs', title: 'Die Granate hats erledigt' },
   { id: 'LN52-LySPXI', title: 'Präzisionslandung auf dem Boot' },
   { id: 'Z7blPZ9gbVw', title: 'Wenn das ganze Team da steht' },
+  { id: 'inbxlK1G8hQ', title: 'Was passiert hier denn?' },
+  { id: 'ode9q5VBj78', title: 'Wenn ich es schaffe...' },
 ];
