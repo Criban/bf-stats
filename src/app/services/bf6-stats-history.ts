@@ -14,7 +14,9 @@ function validSnapshot(value: unknown): value is StatsSnapshot {
   // Remove test snapshots persisted by the former Criban demo.
   return (value as { source?: unknown }).source !== 'demo'
     && typeof snapshot.savedAt === 'string' && Number.isFinite(Date.parse(snapshot.savedAt))
-    && !!snapshot.values && HISTORY_METRICS.every(key => snapshot.values[key] === null
+    && !!snapshot.values
+    && (snapshot.values.killDeath !== 0 || (snapshot.values.hoursPlayed ?? 0) > 0 || (snapshot.values.matchesPlayed ?? 0) > 0)
+    && HISTORY_METRICS.every(key => snapshot.values[key] === null
       || (typeof snapshot.values[key] === 'number' && Number.isFinite(snapshot.values[key]) && snapshot.values[key]! >= 0));
 }
 
@@ -22,22 +24,37 @@ function calendarDay(date: Date): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
 }
 
+function storedSnapshots(name: string, target: StorageAccess): StatsSnapshot[] {
+  try {
+    const raw = target.getItem(`bf6-stats-history:v2:${encodeURIComponent(name)}`);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return parsed?.version === 2 && Array.isArray(parsed.snapshots) ? parsed.snapshots.filter(validSnapshot) : [];
+    }
+    const legacy = JSON.parse(target.getItem(`bf6-stats-history:v1:${encodeURIComponent(name)}`) ?? 'null');
+    return [legacy?.previous, legacy?.latest].filter(validSnapshot);
+  } catch { return []; }
+}
+
+/** Read the daily history without creating or changing stored readings. */
+export function getDailyStatsHistory(name: string, now = new Date(), storage?: StorageAccess): StatsSnapshot[] {
+  try {
+    const daily = new Map<string, StatsSnapshot>();
+    for (const snapshot of storedSnapshots(name, storage ?? globalThis.localStorage).sort((a, b) => Date.parse(a.savedAt) - Date.parse(b.savedAt))) {
+      if (Date.parse(snapshot.savedAt) <= now.getTime()) daily.set(calendarDay(new Date(snapshot.savedAt)), snapshot);
+    }
+    return [...daily.values()];
+  } catch { return []; }
+}
+
 /** Retain one live snapshot per Berlin calendar day; compare with the latest earlier day. */
 export function compareDailyStats(name: string, stats: Bf6Stats, now = new Date(), storage?: StorageAccess): StatsComparison | null {
+  if (stats.killDeath === 0 && !(stats.hoursPlayed && stats.hoursPlayed > 0) && !(stats.matchesPlayed && stats.matchesPlayed > 0)) return null;
   try {
     const target = storage ?? globalThis.localStorage;
     const key = `bf6-stats-history:v2:${encodeURIComponent(name)}`;
     const raw = target.getItem(key);
-    let snapshots: StatsSnapshot[] = [];
-    try {
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed?.version === 2 && Array.isArray(parsed.snapshots)) snapshots = parsed.snapshots.filter(validSnapshot);
-      } else {
-        const legacy = JSON.parse(target.getItem(`bf6-stats-history:v1:${encodeURIComponent(name)}`) ?? 'null');
-        snapshots = [legacy?.previous, legacy?.latest].filter(validSnapshot);
-      }
-    } catch { /* Recover an unreadable entry with a fresh history. */ }
+    let snapshots = getDailyStatsHistory(name, now, target);
     const today = calendarDay(now);
     const daily = new Map<string, StatsSnapshot>();
     for (const snapshot of snapshots.sort((a, b) => Date.parse(a.savedAt) - Date.parse(b.savedAt))) {

@@ -1,0 +1,32 @@
+<dialog #dialog aria-labelledby="kd-history-title" aria-describedby="kd-history-note" (close)="closed.emit()" (click)="dismissBackdrop($event)">
+  <header>
+    <div><p class="eyebrow">BATTLEFIELD 6 / {{ name() }}</p><h2 id="kd-history-title">K/D-VERLAUF</h2></div>
+    <button class="close-button" type="button" autofocus aria-label="K/D-Verlauf schließen" (click)="close()">✕</button>
+  </header>
+  @if (selected(); as point) {
+    <div class="reading" aria-live="polite" aria-atomic="true"><strong>{{ formatValue(point.value) }} <small>K/D</small></strong><span>{{ formatDate(point.savedAt) }}</span></div>
+    <svg viewBox="0 0 720 280" role="img" aria-label="K/D über die gespeicherten Tage. Einzelne Werte können mit dem Regler darunter ausgewählt werden." (pointermove)="selectPoint($event)" (pointerdown)="selectPoint($event)">
+      @for (tick of chart().ticks; track $index) {
+        <line class="grid-line" x1="64" x2="656" [attr.y1]="tick.y" [attr.y2]="tick.y" />
+        <text class="axis-label" x="50" [attr.y]="tick.y + 5" text-anchor="end">{{ formatValue(tick.value) }}</text>
+      }
+      <polyline class="history-line" [attr.points]="chart().line" />
+      @for (reading of chart().points; track reading.savedAt) {
+        <circle class="history-point" [attr.cx]="reading.x" [attr.cy]="reading.y" r="4"><title>{{ formatDate(reading.savedAt) }}: {{ formatValue(reading.value) }} K/D</title></circle>
+      }
+      <line class="selected-line" [attr.x1]="point.x" [attr.x2]="point.x" y1="32" y2="244" />
+      <circle class="selected-point" [attr.cx]="point.x" [attr.cy]="point.y" r="7" />
+      @if (chart().points.length > 1) {
+        <text class="axis-label" x="64" y="273">{{ shortDate(chart().points[0].savedAt) }}</text>
+        <text class="axis-label" x="656" y="273" text-anchor="end">{{ shortDate(chart().points[chart().points.length - 1].savedAt) }}</text>
+      } @else { <text class="axis-label" x="360" y="273" text-anchor="middle">{{ shortDate(point.savedAt) }}</text> }
+    </svg>
+    @if (chart().points.length > 1) {
+      <label class="slider-label" for="kd-history-day">TAG AUSWÄHLEN <span>{{ chart().points.length }} gespeicherte Tage</span></label>
+      <input id="kd-history-day" type="range" min="0" [max]="chart().points.length - 1" step="1" [value]="index()" [attr.aria-valuetext]="formatDate(point.savedAt) + ': ' + formatValue(point.value) + ' K/D'" (input)="selectSlider($event)" />
+    } @else { <p class="empty-note">Der erste Tageswert ist gespeichert. Ab einem weiteren Tag entsteht hier dein Verlauf.</p> }
+  } @else {
+    <div class="empty-state"><h3>Noch kein Verlauf vorhanden</h3><p>Sobald Live-Statistiken geladen werden, wird der erste Tageswert gespeichert.</p></div>
+  }
+  <p id="kd-history-note" class="history-note">Ein Live-Wert pro Tag und Spieler, gespeichert in diesem Browser. Heutige Werte werden beim Abruf aktualisiert. Tage ohne Abruf bleiben frei; gespeicherte API-Abzüge werden nicht übernommen.</p>
+</dialog>

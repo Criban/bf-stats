@@ -41,7 +41,11 @@ try {
   assert.equal(parseShots([{ id: 'wp_temp', shotsFired: -1 }]), null);
   assert.equal(parseShots([{ id: 'wp_temp' }]), null);
   console.log('PASS shots from wp_temp weapon group, zero and missing/invalid counts');
-  for (const mode of ['live', 'stats-error', 'profile-error', 'invalid-kd', 'missing-snapshot']) {
+  assert.throws(() => parser.parseStats({ infantryKillDeath: 0 }, {}), /K\/D/);
+  assert.throws(() => parser.parseStats({ infantryKillDeath: 0, kills: 0, deaths: 0, secondsPlayed: 0 }, {}), /K\/D/);
+  assert.throws(() => parser.parseStats({ infantryKillDeath: 0, deaths: 100 }, { playerProfiles: [{ stats: [{ name: 'human_kills_total', value: 200 }] }] }), /K\/D/);
+  assert.equal(parser.parseStats({ infantryKillDeath: 0, kills: 0, deaths: 10, secondsPlayed: 600 }, {}).killDeath, 0, 'A genuine zero K/D remains valid');
+  for (const mode of ['live', 'stats-error', 'profile-error', 'invalid-kd', 'empty-zero', 'missing-snapshot']) {
     const calls = [];
     const http = { get(url) {
       calls.push(url);
@@ -49,7 +53,7 @@ try {
       if ((mode === 'stats-error' || mode === 'missing-snapshot') && url.includes('/stats/')) return throwError(() => new Error('API failure'));
       if (mode === 'profile-error' && url.includes('/profile/')) return throwError(() => new Error('Profile failure'));
       if (url.includes('/profile/')) return of(snapshot.players[name].profile);
-      return of(mode === 'invalid-kd' ? { infantryKillDeath: null } : snapshot.players[name].response);
+      return of(mode === 'invalid-kd' ? { infantryKillDeath: null } : mode === 'empty-zero' ? { infantryKillDeath: 0, deaths: 0, secondsPlayed: 0 } : snapshot.players[name].response);
     } };
     const injector = Injector.create({ providers: [{ provide: HttpClient, useValue: http }] });
     const service = runInInjectionContext(injector, () => new Bf6StatsService());
@@ -84,7 +88,7 @@ try {
     }
     console.log(`PASS ${mode}`);
   }
-  for (const mode of ['name-success', 'name-error', 'invalid-kd', 'profile-error', 'both-error', 'unknown-id']) {
+  for (const mode of ['name-success', 'name-error', 'invalid-kd', 'empty-zero', 'profile-error', 'both-error', 'unknown-id']) {
     const calls = [];
     const playerName = 'MV-Criban';
     const playerId = mode === 'unknown-id' ? 'unknown' : '353727533';
@@ -96,7 +100,7 @@ try {
       if (mode === 'both-error' || mode === 'unknown-id' || (!byId && mode === 'name-error')) return throwError(() => new Error('Player not found'));
       if (!byId && mode === 'profile-error' && url.includes('/profile/')) return throwError(() => new Error('Profile not found'));
       if (url.includes('/profile/')) return of(snapshot.players[playerName].profile);
-      return of(!byId && mode === 'invalid-kd' ? { infantryKillDeath: null } : snapshot.players[playerName].response);
+      return of(!byId && mode === 'invalid-kd' ? { infantryKillDeath: null } : !byId && mode === 'empty-zero' ? { infantryKillDeath: 0, deaths: 0, secondsPlayed: 0 } : snapshot.players[playerName].response);
     } };
     const service = runInInjectionContext(Injector.create({ providers: [{ provide: HttpClient, useValue: http }] }), () => new Bf6StatsService());
     const result = await firstValueFrom(service.getStats(playerName, playerId));

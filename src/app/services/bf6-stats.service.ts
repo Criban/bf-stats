@@ -4,7 +4,7 @@ import { catchError, finalize, forkJoin, map, Observable, of, shareReplay, tap, 
 import { topWeapons, type WeaponStats } from './weapon-stats';
 import { parseAccuracy } from './accuracy';
 export interface Bf6Stats { killDeath: number; accuracy: number | null; rank: number | null; rankName: string | null; hoursPlayed: number | null; matchesPlayed: number | null; shotsFired: number | null; weapons: WeaponStats[]; capturedAt?: string; }
-type ProfileResponse = { playerProfiles?: { playerCard?: { rank?: unknown }; rankName?: unknown }[] };
+type ProfileResponse = { playerProfiles?: { playerCard?: { rank?: unknown }; rankName?: unknown; stats?: { name?: string; value?: unknown }[] }[] };
 type Snapshot = { players: Record<string, { capturedAt: string; response: Record<string, unknown>; profile: ProfileResponse }> };
 @Injectable({ providedIn: 'root' })
 export class Bf6StatsService {
@@ -60,6 +60,15 @@ export class Bf6StatsService {
       };
       const killDeath = number(response?.['infantryKillDeath']);
       if (killDeath === null) throw new Error('Keine gültige K/D erhalten.');
+      // The API can return a successful but empty stats payload with K/D = 0.
+      // A real zero ratio needs recorded deaths and no contradictory human kills.
+      if (killDeath === 0) {
+        const deaths = number(response['deaths']);
+        const humanKills = number(profile?.playerProfiles?.[0]?.stats?.find(stat => stat.name === 'human_kills_total')?.value);
+        if (deaths === null || deaths === 0 || (humanKills !== null && humanKills > 0)) {
+          throw new Error('Leere oder widersprüchliche K/D-Antwort erhalten.');
+        }
+      }
       const seconds = number(response['secondsPlayed']);
       const gameModeGroups = response['gameModeGroups'];
       const allModes = Array.isArray(gameModeGroups) ? gameModeGroups.find(group => group?.gamemodeName === 'All') : undefined;

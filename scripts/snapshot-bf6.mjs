@@ -1,7 +1,7 @@
 import { mkdir, writeFile, rename } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
-const identities = [{ name: 'MV-8lackh4wk', playerid: '1811857213' }, { name: 'MV-Criban', playerid: '353727533' }];
+const identities = [{ name: 'MV-8lackh4wk', playerid: '1811857213' }, { name: 'MV-Criban', playerid: '353727533' }, { name: 'MV-54bI44', playerid: '1008896742053' }];
 const endpoint = 'https://api.gametools.network/bf6/';
 const players = {};
 for (const { name, playerid } of identities) {
@@ -20,6 +20,13 @@ for (const { name, playerid } of identities) {
     if (kd === null || kd === undefined || kd === '' || !Number.isFinite(Number(kd)) || Number(kd) < 0) {
       throw new Error(`${name}: no valid K/D; existing snapshot preserved.`);
     }
+    if (Number(kd) === 0) {
+      const deaths = Number(stats.deaths);
+      const humanKills = Number(profile.playerProfiles?.[0]?.stats?.find(stat => stat.name === 'human_kills_total')?.value);
+      if (!Number.isFinite(deaths) || deaths <= 0 || (Number.isFinite(humanKills) && humanKills > 0)) {
+        throw new Error(`${name}: empty or inconsistent K/D; existing snapshot preserved.`);
+      }
+    }
     const rank = profile.playerProfiles?.[0]?.playerCard?.rank;
     if (rank === null || rank === undefined || !Number.isFinite(Number(rank))) {
       throw new Error(`${name}: no valid rank; existing snapshot preserved.`);
@@ -32,7 +39,7 @@ for (const { name, playerid } of identities) {
   });
   players[name] = {
     capturedAt: new Date().toISOString(),
-    response: Object.fromEntries(['infantryKillDeath', 'accuracy', 'secondsPlayed', 'gameModeGroups', 'weaponGroups', 'weapons'].map(key => [key, stats[key]])),
+    response: Object.fromEntries(['infantryKillDeath', 'deaths', 'accuracy', 'secondsPlayed', 'gameModeGroups', 'weaponGroups', 'weapons'].map(key => [key, stats[key]])),
     profile: { playerProfiles: [{ playerCard: { rank }, rankName: profile.playerProfiles?.[0]?.rankName }] }
   };
   console.log(`${name}: snapshot captured (${players[name].capturedAt})`);

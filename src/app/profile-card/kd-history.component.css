@@ -1,0 +1,29 @@
+:host { display:contents; }
+dialog { width:min(760px,calc(100vw - 32px)); max-height:calc(100svh - 32px); overflow:auto; padding:28px; border:1px solid var(--line); background:radial-gradient(ellipse at 90% 0%,#d5dcac0c,transparent 65%),#171d19; color:var(--text); box-shadow:0 24px 100px #0008; }
+dialog::backdrop { background:#050906bb; backdrop-filter:blur(5px); }
+header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+.eyebrow { color:var(--muted); font-size:10px; letter-spacing:1.5px; margin:0 0 8px; overflow-wrap:anywhere; }
+h2 { font:600 36px/1 'Barlow Condensed',sans-serif; margin:0; }
+.close-button { background:transparent; color:var(--text); border:1px solid var(--line); width:44px; height:44px; flex-shrink:0; cursor:pointer; }
+.close-button:hover { background:#d5dcac12; }
+.reading { display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin:28px 0 12px; font-variant-numeric:tabular-nums; }
+.reading strong { font:600 48px/1 'Barlow Condensed',sans-serif; color:var(--accent); }
+.reading small { font:500 12px 'Barlow',sans-serif; color:var(--muted); }
+.reading > span { color:var(--muted); font-size:13px; }
+svg { display:block; width:100%; overflow:visible; }
+.grid-line { stroke:var(--line); stroke-dasharray:4 6; }
+.axis-label { fill:var(--muted); font:13px 'Barlow',sans-serif; }
+.history-line { fill:none; stroke:var(--accent); stroke-width:3; stroke-linejoin:round; stroke-linecap:round; }
+.history-point { fill:var(--accent); }
+.selected-line { stroke:var(--accent); stroke-opacity:.3; stroke-dasharray:3 5; }
+.selected-point { fill:var(--accent); stroke:#171d19; stroke-width:3; }
+.slider-label { display:flex; justify-content:space-between; gap:12px; margin-top:18px; color:var(--muted); font-size:10px; letter-spacing:1px; }
+.slider-label span { letter-spacing:0; }
+input[type=range] { display:block; width:100%; min-height:36px; margin:6px 0; accent-color:var(--accent); cursor:pointer; }
+input:focus-visible { outline:2px solid var(--accent); outline-offset:4px; }
+.history-note { border-top:1px solid var(--line); margin:20px 0 0; padding-top:16px; color:var(--muted); font-size:11px; line-height:1.6; }
+.empty-note { color:var(--muted); font-size:13px; line-height:1.6; }
+.empty-state { padding:44px 0; }
+.empty-state h3 { color:var(--accent); font:600 24px 'Barlow Condensed',sans-serif; margin:0 0 12px; }
+.empty-state p { color:var(--muted); font-size:14px; line-height:1.6; }
+@media(max-width:480px) { dialog { padding:20px 16px; } h2 { font-size:30px; } .reading strong { font-size:40px; } .axis-label { font-size:16px; } }

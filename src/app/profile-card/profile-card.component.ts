@@ -1,8 +1,9 @@
-import { Component, inject, input, output } from '@angular/core';
+import { Component, effect, inject, input, output, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { catchError, combineLatest, distinctUntilChanged, map, of, startWith, Subject, switchMap, tap } from 'rxjs';
 import { Bf6StatsService, type Bf6Stats } from '../services/bf6-stats.service';
-import { compareDailyStats, HISTORY_METRICS, type HistoryMetric } from '../services/bf6-stats-history';
+import { compareDailyStats, getDailyStatsHistory, HISTORY_METRICS, type HistoryMetric, type StatsSnapshot } from '../services/bf6-stats-history';
+import { KdHistoryComponent } from './kd-history.component';
 
 type StatChange = { text: string; direction: 'positive' | 'negative' };
 type StatsState = { status: 'private' } | { status: 'loading' } | { status: 'error' } | { status: 'ready'; killDeath: string; accuracy: string; rank: string; rankName: string | null; hours: string; matches: string; shots: string; capturedAt?: string; changes: Record<HistoryMetric, StatChange | null>; comparisonNote: string | null; weapons: { weaponName: string; kills: string }[] };
@@ -20,15 +21,23 @@ export interface PlayerProfile {
 @Component({
   selector: 'app-profile-card',
   standalone: true,
+  imports: [KdHistoryComponent],
   templateUrl: './profile-card.component.html',
   styleUrl: './profile-card.component.css'
 })
 export class ProfileCardComponent {
   readonly player = input.required<PlayerProfile>();
   readonly statsLoaded = output<{ playerId: string; stats: Bf6Stats }>();
+  readonly kdHistory = signal<StatsSnapshot[] | null>(null);
   private readonly statsService = inject(Bf6StatsService);
   private readonly reload = new Subject<void>();
   private readonly formatter = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  constructor() {
+    effect(() => { this.player(); this.kdHistory.set(null); });
+  }
+
+  openKdHistory(): void { this.kdHistory.set(getDailyStatsHistory(this.player().name)); }
 
   readonly stats = toSignal(combineLatest([
     toObservable(this.player).pipe(distinctUntilChanged((a, b) => a.name === b.name && a.id === b.id && a.privateProfile === b.privateProfile)),

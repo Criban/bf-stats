@@ -4,7 +4,7 @@ import ts from 'typescript';
 
 const source = await readFile(new URL('../src/app/services/bf6-stats-history.ts', import.meta.url), 'utf8');
 const compiled = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } }).outputText;
-const { compareDailyStats } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`);
+const { compareDailyStats, getDailyStatsHistory } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`);
 const entries = new Map();
 const storage = { getItem: key => entries.get(key) ?? null, setItem: (key, value) => entries.set(key, value) };
 const initial = { killDeath: 2, hoursPlayed: 10, matchesPlayed: 538, accuracy: 25, shotsFired: 2000 };
@@ -69,4 +69,38 @@ assert.ok(history('MV-Criban').every(snapshot => snapshot.source !== 'demo'));
 entries.set(cribanKey, JSON.stringify({ version: 2, snapshots: [oldDemo] }));
 assert.equal(visit({ ...initial, capturedAt: '2026-10-01T15:00:00Z' }, '2026-10-02T10:00:00Z', 'MV-Criban'), null);
 assert.deepEqual(history('MV-Criban'), [], 'Demo-only histories are cleared even during API outages');
-console.log('PASS daily updates, complete history, previous-day comparison, migration, demo cleanup, Berlin midnight/DST, player isolation, fallback and storage errors');
+const readHistory = (name = 'Player A') => getDailyStatsHistory(name, new Date('2026-11-01T00:00:00Z'), storage);
+const emptyStats = { killDeath: 0, hoursPlayed: 0, matchesPlayed: 0, accuracy: 0, shotsFired: 0 };
+visit(initial, '2026-10-02T10:00:00Z', 'Empty API');
+const beforeEmpty = entries.get('bf6-stats-history:v2:Empty%20API');
+assert.equal(visit(emptyStats, '2026-10-02T11:00:00Z', 'Empty API'), null);
+assert.equal(entries.get('bf6-stats-history:v2:Empty%20API'), beforeEmpty, 'Empty zero replies must not overwrite a valid reading');
+entries.set('bf6-stats-history:v2:Old%20Empty', JSON.stringify({ version: 2, snapshots: [{ savedAt: '2026-10-01T10:00:00Z', values: emptyStats }, { savedAt: '2026-10-02T10:00:00Z', values: { ...initial, killDeath: 0 } }] }));
+assert.equal(readHistory('Old Empty').length, 1, 'Old empty API readings are excluded, real zero readings remain');
+const beforeRead = [...entries];
+assert.deepEqual(readHistory(), history(), 'Chart reads all saved daily entries');
+assert.deepEqual([...entries], beforeRead, 'Opening history does not modify storage');
+assert.deepEqual(readHistory('Not Visited'), []);
+assert.deepEqual(getDailyStatsHistory('A', new Date(), { getItem() { throw new Error('Blocked'); }, setItem() {} }), []);
+entries.set('bf6-stats-history:v2:Chart', JSON.stringify({ version: 2, snapshots: [
+  { savedAt: '2026-10-03T10:00:00Z', values: initial },
+  { savedAt: '2026-10-02T10:00:00Z', values: initial },
+  { savedAt: '2026-10-02T11:00:00Z', values: update },
+  { savedAt: '2026-10-04T10:00:00Z', values: update },
+  { savedAt: 'invalid', values: initial }, oldDemo
+] }));
+assert.deepEqual(getDailyStatsHistory('Chart', new Date('2026-10-03T12:00:00Z'), storage).map(snapshot => snapshot.values.killDeath), [1.9, 2], 'History sorts dates, keeps latest daily reading, removes invalid/demo/future entries');
+const chartSource = await readFile(new URL('../src/app/profile-card/kd-history-chart.ts', import.meta.url), 'utf8');
+const chartCompiled = ts.transpileModule(chartSource, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } }).outputText;
+const { kdHistoryChart } = await import(`data:text/javascript;base64,${Buffer.from(chartCompiled).toString('base64')}`);
+assert.deepEqual(kdHistoryChart([]).points, []);
+const single = kdHistoryChart([{ savedAt: '2026-10-01T10:00:00Z', values: initial }]);
+assert.equal(single.points[0].x, 360, 'One reading is centered');
+assert.ok(Number.isFinite(single.points[0].y));
+const plot = kdHistoryChart([1, 2, 5].map((day, index) => ({ savedAt: `2026-10-0${day}T10:00:00Z`, values: { ...initial, killDeath: [2, 0, 3][index] } })));
+assert.deepEqual(plot.points.map(point => point.x), [64, 212, 656], 'Skipped days retain their actual time spacing');
+assert.ok(plot.points[2].y < plot.points[0].y && plot.points[0].y < plot.points[1].y, 'Higher K/D plots above lower K/D');
+assert.ok(plot.points.every(point => Number.isFinite(point.y) && point.y >= 32 && point.y <= 244));
+assert.equal(kdHistoryChart([{ savedAt: '2026-10-01T10:00:00Z', values: { ...initial, killDeath: null } }]).points.length, 0);
+assert.ok(kdHistoryChart([1, 2].map(day => ({ savedAt: `2026-10-0${day}T10:00:00Z`, values: { ...initial, killDeath: 0 } }))).points.every(point => Number.isFinite(point.y)), 'Constant zero readings have a valid scale');
+console.log('PASS daily updates, complete history, previous-day comparison, migration, demo cleanup, Berlin midnight/DST, player isolation, fallback, storage errors and K/D chart');

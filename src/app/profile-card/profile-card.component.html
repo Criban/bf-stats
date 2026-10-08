@@ -13,7 +13,10 @@
       <span>K/D <small>KILLS / TODE</small></span>
       @if (state.status === 'loading') { <span class="skeleton skeleton-kd" aria-hidden="true"></span> }
       @else {
-        <div class="main-stat-value"><strong>{{ state.status === 'ready' ? state.killDeath : '—' }}</strong>
+        <div class="main-stat-value">
+          @if (state.status === 'ready') {
+            <button class="kd-history-button" type="button" aria-haspopup="dialog" [attr.aria-expanded]="kdHistory() !== null" [attr.aria-label]="'K/D-Verlauf für ' + player().name + ' öffnen, aktuelle K/D ' + state.killDeath" (click)="openKdHistory()"><strong>{{ state.killDeath }}</strong><span class="kd-history-hint">VERLAUF ↗</span></button>
+          } @else { <strong>—</strong> }
           @if (state.status === 'ready' && state.changes.killDeath; as change) { <span [class]="'stat-change ' + change.direction">({{ change.text }})</span> }
         </div>
       }
@@ -57,3 +60,6 @@
   </div>
   }
 </article>
+@if (kdHistory(); as snapshots) {
+  <app-kd-history [name]="player().name" [snapshots]="snapshots" (closed)="kdHistory.set(null)" />
+}
