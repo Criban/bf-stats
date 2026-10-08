@@ -84,17 +84,52 @@ try {
     }
     console.log(`PASS ${mode}`);
   }
+  for (const mode of ['name-success', 'name-error', 'invalid-kd', 'profile-error', 'both-error', 'unknown-id']) {
+    const calls = [];
+    const playerName = 'MV-Criban';
+    const playerId = mode === 'unknown-id' ? 'unknown' : '353727533';
+    const http = { get(url, options) {
+      if (url.startsWith('data/')) { calls.push({ snapshot: true }); return of(snapshot); }
+      const params = options.params;
+      calls.push({ url, name: params.get('name'), playerid: params.get('playerid') });
+      const byId = params.has('playerid');
+      if (mode === 'both-error' || mode === 'unknown-id' || (!byId && mode === 'name-error')) return throwError(() => new Error('Player not found'));
+      if (!byId && mode === 'profile-error' && url.includes('/profile/')) return throwError(() => new Error('Profile not found'));
+      if (url.includes('/profile/')) return of(snapshot.players[playerName].profile);
+      return of(!byId && mode === 'invalid-kd' ? { infantryKillDeath: null } : snapshot.players[playerName].response);
+    } };
+    const service = runInInjectionContext(Injector.create({ providers: [{ provide: HttpClient, useValue: http }] }), () => new Bf6StatsService());
+    const result = await firstValueFrom(service.getStats(playerName, playerId));
+    const usesSnapshot = mode === 'both-error' || mode === 'unknown-id';
+    assert.equal(result.capturedAt, usesSnapshot ? snapshot.players[playerName].capturedAt : undefined);
+    const idCalls = calls.filter(call => call.playerid);
+    assert.equal(idCalls.length, mode === 'name-success' || mode === 'unknown-id' ? 0 : 2);
+    for (const call of idCalls) {
+      assert.equal(call.playerid, '353727533');
+      assert.equal(call.name, null, 'ID lookup must omit name');
+    }
+    assert.equal(calls.some(call => call.snapshot), usesSnapshot);
+    if (!usesSnapshot) {
+      const count = calls.length;
+      await firstValueFrom(service.getStats(playerName, playerId));
+      assert.equal(calls.length, count, 'Successful ID fallback must be cached');
+      service.invalidateCache(playerName, playerId);
+      await firstValueFrom(service.getStats(playerName, playerId));
+      assert.equal(calls.length, count * 2);
+    }
+    console.log(`PASS playerid fallback ${mode}`);
+  }
   const { historyTotals } = await import(pathToFileURL(path.join(temporary, 'history-totals.mjs')));
   const { BATTLEFIELD_HISTORY } = await import(pathToFileURL(path.join(temporary, 'battlefield-history.mjs')));
   const bf6 = { hoursPlayed: 10.25, shotsFired: 2000, matchesPlayed: 12 };
   const totals = historyTotals(BATTLEFIELD_HISTORY['353727533'], bf6);
-  assert.deepEqual(totals, { hours: { value: 709.6958333333333, partial: false }, shots: { value: 1321076, partial: false }, matches: { value: 1755, partial: false } });
+  assert.deepEqual(totals, { hours: { value: 749.8727777777779, partial: false }, shots: { value: 1339806, partial: false }, matches: { value: 1876, partial: false } });
   const hawkTotals = historyTotals(BATTLEFIELD_HISTORY['1811857213'], bf6);
   assert.deepEqual(hawkTotals, { hours: { value: 747.8958333333334, partial: false }, shots: { value: 1672500, partial: false }, matches: { value: 2254, partial: false } });
   assert.equal(historyTotals([{ game: 'Battlefield 6', stats: [], totals: bf6 }], bf6).shots.value, 2000);
   assert.deepEqual(historyTotals([], null).shots, { value: null, partial: true });
   assert.deepEqual(historyTotals([], { ...bf6, shotsFired: 0 }).shots, { value: 0, partial: false });
-  assert.deepEqual(historyTotals(BATTLEFIELD_HISTORY['353727533'], { ...bf6, shotsFired: null }).shots, { value: 1319076, partial: true });
+  assert.deepEqual(historyTotals(BATTLEFIELD_HISTORY['353727533'], { ...bf6, shotsFired: null }).shots, { value: 1337806, partial: true });
   console.log('PASS history totals, BF6 counted once, missing values and zero');
 } finally {
   for (const file of files) await unlink(path.join(temporary, `${file}.mjs`)).catch(() => {});

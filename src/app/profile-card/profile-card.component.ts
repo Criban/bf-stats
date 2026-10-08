@@ -31,10 +31,10 @@ export class ProfileCardComponent {
   private readonly formatter = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   readonly stats = toSignal(combineLatest([
-    toObservable(this.player).pipe(distinctUntilChanged((a, b) => a.name === b.name && a.privateProfile === b.privateProfile)),
+    toObservable(this.player).pipe(distinctUntilChanged((a, b) => a.name === b.name && a.id === b.id && a.privateProfile === b.privateProfile)),
     this.reload.pipe(startWith(undefined))
   ]).pipe(
-    switchMap(([player]) => player.privateProfile ? of<StatsState>({ status: 'private' }) : this.statsService.getStats(player.name).pipe(
+    switchMap(([player]) => player.privateProfile ? of<StatsState>({ status: 'private' }) : this.statsService.getStats(player.name, player.id).pipe(
       tap(stats => this.statsLoaded.emit({ playerId: player.id, stats })),
       map((stats): StatsState => ({ status: 'ready', killDeath: this.formatter.format(stats.killDeath), accuracy: stats.accuracy === null ? '—' : this.formatValue(stats.accuracy, 1) + ' %', rank: this.formatValue(stats.rank), rankName: stats.rankName, hours: this.formatValue(stats.hoursPlayed, 1), matches: this.formatValue(stats.matchesPlayed), shots: this.formatValue(stats.shotsFired), capturedAt: stats.capturedAt ? new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Berlin' }).format(new Date(stats.capturedAt)) : undefined, ...this.compareStats(player.name, stats), weapons: stats.weapons.map(weapon => ({ weaponName: weapon.weaponName, kills: this.formatValue(weapon.kills) })) })),
       catchError(() => of<StatsState>({ status: 'error' })),
@@ -66,7 +66,7 @@ export class ProfileCardComponent {
   }
 
   retryStats(): void {
-    this.statsService.invalidateCache(this.player().name);
+    this.statsService.invalidateCache(this.player().name, this.player().id);
     this.reload.next();
   }
 }

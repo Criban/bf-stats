@@ -26,15 +26,15 @@ export class AppComponent {
   readonly players: PlayerProfile[] = [
     { id: '1811857213', image: 'images/8lackh4wk-aiming-soldier.png', imageAlt: 'Soldat mit schwarzer Ausrüstung, Schutzbrille und Gewehr im Schulteranschlag', name: 'MV-8lackh4wk', description: 'Zusammen auf dem Battlefield.' },
     { id: '353727533', image: 'images/criban-gasmask-soldier.png', imageAlt: 'Soldat mit Gasmaske, Helm und dunkler taktischer Ausrüstung', name: 'MV-Criban', description: 'Wir geben unser Bestes – meistens reicht\'s.' },
-    { id: 'mv-kingcoffee', image: 'images/kingcoffee-support-transparent.png', imageAlt: 'Versorger von vorne mit Helm, Sonnenbrille und locker auf Hüfthöhe gehaltenem Gewehr', name: 'MV-KingCoffee', description: 'Versorger – hält das Squad am Laufen.', privateProfile: true },
-    { id: 'mv-54bi44', image: 'images/54bi44-camping-chair.png', imageAlt: 'Soldat mit Kapuze und Schutzbrille sitzt entspannt auf einem Campingstuhl', name: 'MV-54bI44', description: 'Kurze Einsatzpause.' },
+    { id: 'unknown', image: 'images/kingcoffee-support-transparent.png', imageAlt: 'Versorger von vorne mit Helm, Sonnenbrille und locker auf Hüfthöhe gehaltenem Gewehr', name: 'MV-KingCoffee', description: 'Versorger – hält das Squad am Laufen.', privateProfile: true },
+    { id: 'unknown', image: 'images/54bi44-camping-chair.png', imageAlt: 'Soldat mit Kapuze und Schutzbrille sitzt entspannt auf einem Campingstuhl', name: 'MV-54bI44', description: 'Kurze Einsatzpause.' },
   ];
   private readonly statsService = inject(Bf6StatsService);
   private readonly destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
     for (const player of this.players.filter(player => !player.privateProfile)) {
-      this.statsService.getStats(player.name).pipe(
+      this.statsService.getStats(player.name, player.id).pipe(
         catchError(() => EMPTY), takeUntilDestroyed(this.destroyRef)
       ).subscribe(stats => {
         compareDailyStats(player.name, stats);

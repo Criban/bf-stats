@@ -1,6 +1,6 @@
 ﻿import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { catchError, finalize, forkJoin, map, Observable, of, shareReplay, tap, timeout } from 'rxjs';
+import { catchError, finalize, forkJoin, map, Observable, of, shareReplay, tap, throwError, timeout } from 'rxjs';
 import { topWeapons, type WeaponStats } from './weapon-stats';
 import { parseAccuracy } from './accuracy';
 export interface Bf6Stats { killDeath: number; accuracy: number | null; rank: number | null; rankName: string | null; hoursPlayed: number | null; matchesPlayed: number | null; shotsFired: number | null; weapons: WeaponStats[]; capturedAt?: string; }
@@ -13,22 +13,24 @@ export class Bf6StatsService {
   private readonly pending = new Map<string, Observable<Bf6Stats>>();
   private readonly cacheDuration = 5 * 60 * 1000;
 
-  invalidateCache(name: string): void {
-    this.cache.delete(name);
+  invalidateCache(name: string, playerId?: string): void {
+    this.cache.delete(this.cacheKey(name, playerId));
   }
 
-  getStats(name: string): Observable<Bf6Stats> {
-    const cached = this.cache.get(name);
+  private cacheKey(name: string, playerId?: string): string {
+    return /^\d+$/.test(playerId ?? '') ? `${name}:${playerId}` : name;
+  }
+
+  getStats(name: string, playerId?: string): Observable<Bf6Stats> {
+    const key = this.cacheKey(name, playerId);
+    const cached = this.cache.get(key);
     if (cached && cached.expiresAt > Date.now()) return of(cached.stats);
-    this.cache.delete(name);
-    const pending = this.pending.get(name);
+    this.cache.delete(key);
+    const pending = this.pending.get(key);
     if (pending) return pending;
-    const common = { name, platform: 'ea', skip_battlelog: true, lang: 'de-DE', filter: '{"scopes": [{"category": "global", "name": "global"}]}' };
-    const params = new HttpParams({ fromObject: { ...common, categories: 'multiplayer', raw: false, format_values: true, seperation: false } });
-    const profile = this.http.get<ProfileResponse>('https://api.gametools.network/bf6/profile/', { params: new HttpParams({ fromObject: common }) }).pipe(timeout(20000));
-    const request = forkJoin({ response: this.http.get<Record<string, unknown>>('https://api.gametools.network/bf6/stats/', { params }).pipe(timeout(20000)), profile }).pipe(
-      map(({ response, profile }) => this.parseStats(response, profile)),
-      tap(stats => this.cache.set(name, { stats, expiresAt: Date.now() + this.cacheDuration })),
+    const request = this.fetchStats({ name }).pipe(
+      catchError(error => /^\d+$/.test(playerId ?? '') ? this.fetchStats({ playerid: playerId! }) : throwError(() => error)),
+      tap(stats => this.cache.set(key, { stats, expiresAt: Date.now() + this.cacheDuration })),
       catchError(() => this.http.get<Snapshot>('data/bf6-stats-snapshot.json').pipe(
         timeout(5000),
         map(snapshot => {
@@ -37,11 +39,19 @@ export class Bf6StatsService {
           return { ...this.parseStats(player.response, player.profile), capturedAt: player.capturedAt };
         })
       )),
-      finalize(() => this.pending.delete(name)),
+      finalize(() => this.pending.delete(key)),
       shareReplay({ bufferSize: 1, refCount: false })
     );
-    this.pending.set(name, request);
+    this.pending.set(key, request);
     return request;
+  }
+  private fetchStats(identity: { name: string } | { playerid: string }): Observable<Bf6Stats> {
+    const common = { ...identity, platform: 'ea', skip_battlelog: true, lang: 'de-DE', filter: '{"scopes": [{"category": "global", "name": "global"}]}' };
+    const params = new HttpParams({ fromObject: { ...common, categories: 'multiplayer', raw: false, format_values: true, seperation: false } });
+    return forkJoin({
+      response: this.http.get<Record<string, unknown>>('https://api.gametools.network/bf6/stats/', { params }).pipe(timeout(20000)),
+      profile: this.http.get<ProfileResponse>('https://api.gametools.network/bf6/profile/', { params: new HttpParams({ fromObject: common }) }).pipe(timeout(20000))
+    }).pipe(map(({ response, profile }) => this.parseStats(response, profile)));
   }
   private parseStats(response: Record<string, unknown>, profile: ProfileResponse): Bf6Stats {
       const number = (value: unknown): number | null => {
